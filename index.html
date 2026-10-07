@@ -47,7 +47,7 @@ footer{flex:none;display:flex;flex-direction:column;gap:10px;padding-block:12px 
 pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0}
 .status{font-size:15px;color:var(--accent);text-align:center}
 .status:empty{display:none}
-.navrow{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.navrow{display:grid;grid-template-columns:1fr 2fr;gap:10px}
 .btn{padding:14px 12px}
 .quiet{background:transparent;color:var(--muted);border-color:var(--line)}
 .btn:disabled{background:var(--surface);color:var(--muted);border-color:var(--line);cursor:not-allowed}
@@ -134,7 +134,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   .ghost{border-color:var(--line);padding-inline:22px}
   .hint{display:inline;font-size:14px;color:var(--muted);margin-left:auto;transition:opacity .2s}
   .hint kbd{font:500 13px var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
-  .primary:disabled ~ .ghost ~ .hint{opacity:0}
+  .primary:disabled ~ .hint{opacity:0}
   .splash{padding-block:96px}
   .revbtn{width:auto}
 }
@@ -155,8 +155,8 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   <footer>
     <div class="status" id="status" role="status"></div>
     <div class="navrow">
-      <button type="button" class="btn primary" id="b1">Next</button>
       <button type="button" class="btn ghost" id="back">Back</button>
+      <button type="button" class="btn primary" id="b1">Next</button>
       <span class="hint" aria-hidden="true">press <kbd>Enter ↵</kbd></span>
     </div>
   </footer>
