@@ -105,6 +105,39 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
 .metxt strong{font-size:17px;color:var(--ink);font-weight:600}
 #body{display:flex;flex-direction:column;gap:18px}
 .mebtn{align-self:flex-start;background:var(--soft);color:var(--accent);border:1px solid transparent;font:600 15px var(--body);padding:10px 14px;border-radius:999px;cursor:pointer}
+
+/* Motion: each screen rises in */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.in .head,.in #body{animation:rise .35s ease both}
+.in #body{animation-delay:.06s}
+@media (prefers-reduced-motion:reduce){.in .head,.in #body{animation:none}}
+.hint{display:none}
+/* Desktop: a survey, not an app shell. Content flows from a fixed top offset, buttons follow the content. */
+@media (min-width:768px){
+  body{overflow:auto;padding-inline:40px}
+  .app{max-width:720px;height:auto;min-height:100%}
+  header{padding-block:36px 8px}
+  main{flex:none;overflow:visible;padding-top:9vh;padding-bottom:8px;gap:28px}
+  .head{min-height:0;gap:12px}
+  h1{font-size:40px;line-height:1.2}
+  .help{font-size:19px;min-height:0}
+  .fields,.choices,.checklist,.copybox,.callcard,.pcard,.meopt,.addbtn,.found{max-width:560px}
+  .steps{max-width:560px}
+  input{font-size:18px;padding:14px 16px}
+  .choice{font-size:18px;padding:15px 18px}
+  .choice:hover{border-color:var(--accent)}
+  footer{border-top:0;background:transparent;padding-block:8px 64px;gap:8px}
+  .status{text-align:left}
+  .navrow{display:flex;align-items:center;gap:14px}
+  .btn{width:auto;min-height:52px;padding-inline:28px}
+  .ghost{order:2;border-color:transparent;padding-inline:14px}
+  .primary{order:1}
+  .hint{display:inline;order:3;font-size:14px;color:var(--muted);margin-left:auto;transition:opacity .2s}
+  .hint kbd{font:500 13px var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .primary:disabled ~ .hint,.primary:disabled ~ .ghost ~ .hint{opacity:0}
+  .splash{padding-block:96px}
+  .revbtn{width:auto}
+}
 </style>
 </head>
 <body>
@@ -124,6 +157,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     <div class="navrow">
       <button type="button" class="btn ghost" id="back">Back</button>
       <button type="button" class="btn primary" id="b1">Next</button>
+      <span class="hint" aria-hidden="true">press <kbd>Enter ↵</kbd></span>
     </div>
   </footer>
 </div>
@@ -169,6 +203,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   function val(id){var x=$(id);return x?x.value.trim():''}
   function frame(title,help){
     $('q').textContent=title;$('help').textContent=help||'';body.innerHTML='';main.scrollTop=0;status.textContent='';
+    main.classList.remove('in');void main.offsetWidth;main.classList.add('in');
   }
   var ICON={
     mobile:'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="11" y1="18" x2="13" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
@@ -344,6 +379,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     };
   }
   function go(d){if(reviewing&&d>0){return finish(true)}var j=i+d;while(j>=0&&j<Q.length&&!shown(Q[j]))j+=d;if(j<0){i=-1;return render()}if(j>=Q.length){i=Q.length;return finish()}i=j;render()}
+  document.addEventListener('keydown',function(ev){if(ev.key!=='Enter')return;var t=ev.target.tagName,choice=ev.target.classList&&ev.target.classList.contains('choice');if(!choice&&(t==='INPUT'||t==='TEXTAREA'||t==='BUTTON'||t==='A'))return;if(!b1.disabled&&!document.querySelector('footer').hidden){ev.preventDefault();b1.click()}});
   render();
 })();
 </script>
