@@ -114,7 +114,6 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
 .in .head,.in #body{animation:rise .35s ease both}
 .in #body{animation-delay:.06s}
 @media (prefers-reduced-motion:reduce){.in .head,.in #body{animation:none}}
-.hint{display:none}
 /* Desktop: a survey, not an app shell. Content flows from a fixed top offset, buttons follow the content. */
 @media (min-width:768px){
   body{overflow:auto;padding-inline:40px}
@@ -135,9 +134,6 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   .navrow{display:flex;align-items:center;gap:14px}
   .btn{width:auto;min-height:52px;padding-inline:28px}
   .ghost{border-color:var(--line);padding-inline:22px}
-  .hint{display:inline;font-size:14px;color:var(--muted);margin-left:auto;transition:opacity .2s}
-  .hint kbd{font:500 13px var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
-  .primary:disabled ~ .hint{opacity:0}
   .splash{padding-block:96px}
   .revbtn{width:auto}
 }
@@ -160,7 +156,6 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     <div class="navrow">
       <button type="button" class="btn ghost" id="back">Back</button>
       <button type="button" class="btn primary" id="b1">Next</button>
-      <span class="hint" aria-hidden="true">press <kbd>Enter ↵</kbd></span>
     </div>
     <button type="button" class="later" id="later" hidden>Save and finish later</button>
   </footer>
