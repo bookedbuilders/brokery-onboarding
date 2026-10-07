@@ -34,7 +34,7 @@ h1{font:600 26px/1.25 var(--display);margin:0;text-wrap:balance}
 .field{display:flex;flex-direction:column;gap:6px}
 label{font-weight:600;font-size:15px}
 input{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 14px;width:100%;min-height:52px}
-input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .found{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;font:600 19px/1.4 var(--body);word-break:break-word}
 .choices{display:flex;flex-direction:column;gap:10px}
 .choice{text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);font:500 17px var(--body);padding:14px 16px;border-radius:10px;cursor:pointer;min-height:52px}
@@ -43,13 +43,14 @@ footer{flex:none;display:flex;flex-direction:column;gap:10px;padding-block:12px 
 .btn{font:600 17px var(--body);border-radius:10px;padding:14px 20px;cursor:pointer;min-height:54px;width:100%;border:1px solid var(--accent)}
 .primary{background:var(--accent);color:var(--accent-ink)}
 .ghost{background:transparent;color:var(--accent)}
+.ghost:hover{text-decoration:underline;text-underline-offset:4px}
 pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0}
 .status{font-size:15px;color:var(--accent);text-align:center}
 .status:empty{display:none}
-.navrow{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.navrow{display:grid;grid-template-columns:2fr 1fr;gap:10px}
 .btn{padding:14px 12px}
 .quiet{background:transparent;color:var(--muted);border-color:var(--line)}
-.btn:disabled{opacity:.35;cursor:default}
+.btn:disabled{background:var(--surface);color:var(--muted);border-color:var(--line);cursor:not-allowed}
 .checklist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
 .crow{display:flex;align-items:center;gap:14px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink);min-height:56px}
 .crow:first-child{border-top:0}
@@ -130,11 +131,10 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   .status{text-align:left}
   .navrow{display:flex;align-items:center;gap:14px}
   .btn{width:auto;min-height:52px;padding-inline:28px}
-  .ghost{order:2;border-color:transparent;padding-inline:14px}
-  .primary{order:1}
-  .hint{display:inline;order:3;font-size:14px;color:var(--muted);margin-left:auto;transition:opacity .2s}
+  .ghost{border-color:var(--line);padding-inline:22px}
+  .hint{display:inline;font-size:14px;color:var(--muted);margin-left:auto;transition:opacity .2s}
   .hint kbd{font:500 13px var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
-  .primary:disabled ~ .hint,.primary:disabled ~ .ghost ~ .hint{opacity:0}
+  .primary:disabled ~ .ghost ~ .hint{opacity:0}
   .splash{padding-block:96px}
   .revbtn{width:auto}
 }
@@ -155,8 +155,8 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   <footer>
     <div class="status" id="status" role="status"></div>
     <div class="navrow">
-      <button type="button" class="btn ghost" id="back">Back</button>
       <button type="button" class="btn primary" id="b1">Next</button>
+      <button type="button" class="btn ghost" id="back">Back</button>
       <span class="hint" aria-hidden="true">press <kbd>Enter ↵</kbd></span>
     </div>
   </footer>
