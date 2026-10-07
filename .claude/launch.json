@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "brokery", "runtimeExecutable": "python3", "runtimeArgs": ["-m", "http.server", "3093"], "port": 3093, "url": "http://localhost:3093" }
+  ]
+}
