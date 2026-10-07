@@ -23,13 +23,14 @@ Built under DeNovo Brand Identity (Landon Nelson). Joe Harrington runs setup.
 
 1. Done: github.com/bookedbuilders/brokery-onboarding (private).
 2. Host it (static, no build). Not on Vercel. Page has `noindex,nofollow`. Pending: Joe picks the host.
-2b. Supabase: `supabase login`, create project, `supabase db push`, fill `config.js`, create the two admin users.
+2b. Done: Supabase project "Brokery Onboarding" (ref qayaarhzznotvlttazxd, org Denovo MVP, free). Schema applied, sign-ups off, admins joe@ and landon@smileconvert.com created (temporary passwords in `.env`, gitignored). When the public host URL is known: set `site_url` and `additional_redirect_urls` in `supabase/config.toml`, run `supabase config push`.
 3. Wire submissions (they currently go nowhere):
    - Create a GoHighLevel workflow with an **Inbound Webhook** trigger.
    - Paste its URL into `WEBHOOK_URL` in `index.html`.
    - Submit a test run and map the fields in GHL.
 4. Done: `BOOKING_URL` removed.
 5. Retest on a real phone.
+6. First real onboarding (The Brokery) already exists in `/admin` with Tucker's prefills. Copy its link from there.
 
 ## Config (top of the `<script>`)
 
