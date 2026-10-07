@@ -46,6 +46,8 @@ footer{flex:none;display:flex;flex-direction:column;gap:10px;padding-block:12px 
 .ghost:hover{text-decoration:underline;text-underline-offset:4px}
 pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0}
 .status{font-size:15px;color:var(--accent);text-align:center}
+.later{background:none;border:0;color:var(--muted);font:500 15px var(--body);min-height:44px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:center}
+.later:hover{color:var(--ink)}
 .status:empty{display:none}
 .navrow{display:grid;grid-template-columns:1fr 2fr;gap:10px}
 .btn{padding:14px 12px}
@@ -129,6 +131,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   .choice:hover{border-color:var(--accent)}
   footer{border-top:0;background:transparent;padding-block:28px 64px;gap:8px}
   .status{text-align:left}
+  .later{align-self:flex-start;padding-inline:0}
   .navrow{display:flex;align-items:center;gap:14px}
   .btn{width:auto;min-height:52px;padding-inline:28px}
   .ghost{border-color:var(--line);padding-inline:22px}
@@ -159,6 +162,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
       <button type="button" class="btn primary" id="b1">Next</button>
       <span class="hint" aria-hidden="true">press <kbd>Enter ↵</kbd></span>
     </div>
+    <button type="button" class="later" id="later" hidden>Save and finish later</button>
   </footer>
 </div>
 
@@ -170,7 +174,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   var WEBHOOK_URL='';  // optional GoHighLevel inbound webhook, fired on submit
   var SB=window.SB||{};
   var TOKEN=new URLSearchParams(location.search).get('t')||'';
-  var C=null,Q=[],A={},i=-2,pick=null,reviewing=false,sent=false;
+  var C=null,Q=[],A={},i=-2,pick=null,reviewing=false,sent=false,resumed=false;
 
   function rpc(fn,args){
     return fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB.anon,Authorization:'Bearer '+SB.anon},body:JSON.stringify(args)})
@@ -211,7 +215,8 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   function shown(q){return !q.showIf||q.showIf()}
   function vis(){return Q.filter(shown)}
   var $=function(id){return document.getElementById(id)};
-  var main=$('main'),body=$('body'),b1=$('b1'),back=$('back'),status=$('status');
+  var main=$('main'),body=$('body'),b1=$('b1'),back=$('back'),status=$('status'),later=$('later'),toList=false;
+  later.onclick=function(){toList=true;if(b1.disabled){toList=false;return finish(true)}b1.click()};
 
   function el(tag,attrs,text){var e=document.createElement(tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e}
   function input(id,lab,type,v,ph,ac){
@@ -254,7 +259,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   function welcome(){
     $('bar').style.width='0%';$('count').textContent='Welcome';setDev(null);
     document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
-    frame('Welcome to your onboarding',"Here's what we'll cover.");
+    later.hidden=true;frame('Welcome to your onboarding',"Here's what we'll cover.");
     var ul=el('ul',{class:'cover'});['Your primary contact','Facebook, Instagram and Meta access','Website and domain access','Your brokerage software','Business details for texting'].forEach(function(t){ul.appendChild(el('li',{},t))});
     body.appendChild(ul);
     back.disabled=true;b1.disabled=false;b1.textContent='Next';b1.onclick=function(){i=-1;render()};
@@ -262,7 +267,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   function markers(){
     $('bar').style.width='0%';$('count').textContent='Welcome';setDev(null);
     document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
-    frame('Give yourself 15 to 20 minutes',"Go at your own pace. Your progress saves as you go. Some steps are quick on your phone, a few are easier on a computer. Watch for these markers.");
+    later.hidden=true;frame('Give yourself 15 to 20 minutes',"Go at your own pace. Your progress saves as you go. Some steps are quick on your phone, a few are easier on a computer. Watch for these markers.");
     var lg=el('div',{class:'legend'});
     ['mobile','desktop'].forEach(function(k){var r=el('div',{class:'legrow '+k});r.innerHTML='<span class="legicon">'+ICON[k]+'</span><span><strong>'+DEVTXT[k]+'</strong><br>'+(k==='mobile'?'Quick taps and confirmations.':'A few steps inside Meta or your domain host. Easier with a keyboard.')+'</span>';lg.appendChild(r)});
     body.appendChild(lg);
@@ -275,7 +280,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     var V=vis(),pos=V.indexOf(q);
     $('bar').style.width=Math.round(pos/V.length*100)+'%';
     $('count').textContent=(pos+1)+' of '+V.length+' · '+q.sec;
-    frame(q.q,q.help);setDev(q.device||'mobile');
+    frame(q.q,q.help);setDev(q.device||'mobile');later.hidden=false;
     back.disabled=false;b1.disabled=false;
     back.onclick=function(){go(-1)};
     b1.textContent='Next';
@@ -368,7 +373,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     return true;
   }
   function thanks(){
-    setDev(null);
+    setDev(null);later.hidden=true;
     reviewing=true;$('bar').style.width='100%';$('count').textContent='Submitted';
     frame('','');document.querySelector('.head').hidden=true;
     var sp=el('div',{class:'splash'});
@@ -382,9 +387,9 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   function finish(force){
     if(sent&&!force)return thanks();
     setDev(null);reviewing=true;document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
-    $('bar').style.width='100%';$('count').textContent='Review';
+    $('bar').style.width='100%';$('count').textContent='Checklist';later.hidden=true;
     var V=vis();var left=V.filter(function(q){return !isDone(q)}).length;
-    frame('Review your checklist',left?left+' item'+(left>1?'s':'')+" still open. We'll follow up on those. Tap any item to change it.":"Everything's filled in. Tap any item to change it.");
+    frame(resumed?'Welcome back, '+first(C.contact_name):'Review your checklist',left?left+' item'+(left>1?'s':'')+(resumed?' still open. Tap one to pick up where you left off.':" still open. We'll follow up on those. Tap any item to change it."):"Everything's filled in. Tap any item to change it.");resumed=false;
     var call=el('div',{class:'callcard'});call.appendChild(el('strong',{},'Book your 15-minute setup call'));
     call.appendChild(el('span',{},"We'll walk through anything left, including adding your payment card to the new ad account. Plus anything still open below."));
     var tf=input('q_when','What days and times work best?','text',A.when||'','e.g. Thursday after 2pm');tf.classList.add('whenfield');
@@ -421,7 +426,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
       });
     };
   }
-  function go(d){if(reviewing&&d>0){return finish(true)}var j=i+d;while(j>=0&&j<Q.length&&!shown(Q[j]))j+=d;if(j<0){i=-1;return render()}if(j>=Q.length){i=Q.length;return finish()}i=j;render()}
+  function go(d){if(toList){toList=false;return finish(true)}if(reviewing&&d>0){return finish(true)}var j=i+d;while(j>=0&&j<Q.length&&!shown(Q[j]))j+=d;if(j<0){i=-1;return render()}if(j>=Q.length){i=Q.length;return finish()}i=j;render()}
   document.addEventListener('keydown',function(ev){if(ev.key!=='Enter')return;var t=ev.target.tagName,choice=ev.target.classList&&ev.target.classList.contains('choice');if(!choice&&(t==='INPUT'||t==='TEXTAREA'||t==='BUTTON'||t==='A'))return;if(!b1.disabled&&!document.querySelector('footer').hidden){ev.preventDefault();b1.click()}});
 
   // Boot: load this customer's onboarding by the token in the link
@@ -434,6 +439,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     document.title=c.business+' Kickoff Checklist';
     Q=buildQ(c);
     if(sent)return thanks();
+    if(Object.keys(A).length){resumed=true;return finish(true)}
     render();
   }).catch(invalid);
 })();
