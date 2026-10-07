@@ -12,7 +12,7 @@ Built under DeNovo Brand Identity (Landon Nelson). Joe Harrington runs setup.
 ## Tasks for Claude Code
 
 1. Done: github.com/bookedbuilders/brokery-onboarding (private).
-2. Host it. Easiest: GitHub Pages, Netlify or Vercel (static, no build). Page has `noindex,nofollow`.
+2. Done: https://brokery-onboarding.vercel.app (Vercel, auto-deploys from main). Page has `noindex,nofollow`.
 3. Wire submissions (they currently go nowhere):
    - Create a GoHighLevel workflow with an **Inbound Webhook** trigger.
    - Paste its URL into `WEBHOOK_URL` in `index.html`.
