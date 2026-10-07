@@ -21,8 +21,8 @@ Built under DeNovo Brand Identity (Landon Nelson). Joe Harrington runs setup.
 
 ## Tasks for Claude Code
 
-1. Done: github.com/bookedbuilders/brokery-onboarding (private).
-2. Host it (static, no build). Not on Vercel. Page has `noindex,nofollow`. Pending: Joe picks the host.
+1. Done: github.com/bookedbuilders/brokery-onboarding (public as verified October 7, 2026).
+2. Vercel configuration is in `vercel.json`; `npm run build` packages the public files into `dist/`. Connect the existing GitHub repo to one shared Vercel project, then merge to `main` to deploy. See README for setup and teammate instructions. First hosted deployment still pending. Page has `noindex,nofollow`.
 2b. Done: Supabase project "Brokery Onboarding" (ref qayaarhzznotvlttazxd, org Denovo MVP, free). Schema applied, sign-ups off, admins joe@ and landon@smileconvert.com created (temporary passwords in `.env`, gitignored). When the public host URL is known: set `site_url` and `additional_redirect_urls` in `supabase/config.toml`, run `supabase config push`.
 3. Wire submissions (they currently go nowhere):
    - Create a GoHighLevel workflow with an **Inbound Webhook** trigger.

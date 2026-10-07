@@ -3,3 +3,5 @@
 .env*.local
 .env*
 supabase/.temp
+dist/
+node_modules/
