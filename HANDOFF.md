@@ -1,18 +1,29 @@
 # Brokery Onboarding Survey: Handoff
 
-Mobile-first onboarding survey for The Brokery (Tucker Blalock, Managing Broker). Collects system access and business details so we can set up paid ads, the recruiting CRM (GoHighLevel sub-account) and texting registration.
+Mobile-first onboarding survey for The Brokery (Tucker Blalock, Managing Broker). Collects system access and business details so we can set up paid ads, the recruiting CRM (GoHighLevel sub-account) and texting registration. One survey, many customers: each gets a magic link from `/admin`.
 
 Built under DeNovo Brand Identity (Landon Nelson). Joe Harrington runs setup.
 
 ## Files
 
-- `index.html`: the whole app. One self-contained file, no build step, no dependencies except Google Fonts.
+- `index.html`: the customer survey. Loads the customer's onboarding by the `?t=<token>` in their magic link, autosaves after every screen.
+- `admin/index.html`: Joe and Landon sign in, create onboardings (prefills), copy magic links, view saved answers.
+- `config.js`: Supabase URL and anon key (public by design).
+- `supabase/migrations/`: schema. One table `onboardings`; customers reach their row only through three token-gated functions.
+- `.claude/launch.json`: local dev server, port 3093.
 - `HANDOFF.md`: this file.
+
+## Backend (Supabase)
+
+- Admins are Supabase Auth users (email + password, sign-ups disabled). Password set or reset by email link from the sign-in page.
+- Customers never log in. `onboarding_load(token)`, `onboarding_save(...)`, `onboarding_submit(...)` are `security definer` RPCs; the table itself is closed to `anon`.
+- Row: `prefill` (what admin typed), `raw` (survey state, for resume), `answers` (rendered, in screen order), `follow_up`, `progress`, `setup_call`, `submitted_at`.
 
 ## Tasks for Claude Code
 
 1. Done: github.com/bookedbuilders/brokery-onboarding (private).
-2. Host it (static, no build). Not on Vercel. Page has `noindex,nofollow`.
+2. Host it (static, no build). Not on Vercel. Page has `noindex,nofollow`. Pending: Joe picks the host.
+2b. Supabase: `supabase login`, create project, `supabase db push`, fill `config.js`, create the two admin users.
 3. Wire submissions (they currently go nowhere):
    - Create a GoHighLevel workflow with an **Inbound Webhook** trigger.
    - Paste its URL into `WEBHOOK_URL` in `index.html`.
@@ -27,7 +38,6 @@ Built under DeNovo Brand Identity (Landon Nelson). Joe Harrington runs setup.
 | `META_EMAIL` | joe@smileconvert.com | Must match the email on Joe's Facebook login or the Meta invite fails |
 | `INVITE_EMAIL` | joe@smileconvert.com | Cloudflare admin invite |
 | `WEBHOOK_URL` | empty | Set to GHL inbound webhook |
-| `KEY` | brokery-kickoff-v10 | localStorage key. Bump it when questions change so old drafts don't load |
 
 ## Submit payload (POST JSON)
 

@@ -162,34 +162,54 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   </footer>
 </div>
 
+<script src="config.js"></script>
 <script>
 (function(){
-  // Fill these in before sending.
   var META_EMAIL='joe@smileconvert.com';  // must match the email on Joe's Facebook login
-  var INVITE_EMAIL='joe@smileconvert.com';  // email to invite to Cloudflare
-  var Q=[
-    {sec:'Primary contact',id:'you',short:'Primary contact',type:'primary',q:"Is Tucker your primary contact?",help:"We'll coordinate setup through this person. Add someone else if needed."},
-    {sec:'Facebook and Instagram',id:'fb',short:'Facebook Page',type:'confirm',q:"Is this your Facebook Page?",help:"We found this. Fix it if it's wrong, then tap Next.",label:'Facebook Page',val:'facebook.com/TheBrokeryAZ'},
-    {sec:'Facebook and Instagram',id:'ig',short:'Instagram',type:'confirm',q:"Is this your Instagram?",help:"We found this. Fix it if it's wrong, then tap Next.",label:'Instagram',val:'@thebrokery'},
-    {sec:'Facebook and Instagram',id:'bm',short:'Meta Business Manager',type:'choice',q:"Do you have a Meta Business Manager?",help:"Also called a business portfolio, at business.facebook.com.",opts:['Yes','No','Not sure']},
-    {sec:'Facebook and Instagram',id:'bmadmin',short:'Business Manager admin',type:'contact',showIf:function(){return A.bm==='Yes'},q:"Who is the admin on it?",help:"The person who can add new people to it. No passwords shared.",me:true},
-    {sec:'Facebook and Instagram',id:'metapartner',short:'Meta admin access',type:'task',device:'desktop',showIf:function(){return A.bm==='Yes'},q:"Add Joe as an admin in Meta",help:"About 2 minutes on a computer. Lets us create your ad account and handle setup for you.",copyLabel:'Invite this email',copy:function(){return META_EMAIL},steps:['Go to business.facebook.com and open Settings','Click People, then Invite people','Paste our email','Choose Full access, then click Invite'],opts:['Done','Do it on our setup call']},
-    {sec:'Website',id:'site',short:'Website',type:'confirm',q:"Is this your website?",help:"We found this. Fix it if it's wrong, then tap Next.",label:'Website',val:'thebrokery.com'},
-    {sec:'Website',id:'cfinvite',short:'Cloudflare admin access',type:'task',device:'desktop',q:"Add Joe as an admin in Cloudflare",help:"Your domain settings for thebrokery.com live in Cloudflare. This lets us connect your recruiting page for you.",copyLabel:'Invite this email',copy:function(){return INVITE_EMAIL},steps:['Log in at dash.cloudflare.com','Go to Manage account, then Members','Click Invite and paste our email','Choose the Administrator role, then send'],opts:['Done','Do it on our setup call']},
-    {sec:'Software',id:'crm',short:'Brokerage CRM',type:'choice',q:"Which CRM does The Brokery use today?",help:"The system your agents and staff use now. Not ours.",opts:['BoldTrail (kvCORE)','Follow Up Boss','Lofty','Other','None','Not sure']},
-    {sec:'Software',id:'sysadmin',short:'Brokerage CRM and BrokerMint admin',type:'contact',q:"Who can add an admin login to The Brokery's CRM and BrokerMint?",help:"They'll create an admin login for Joseph Harrington so we can connect your systems.",me:true},
-    {sec:'Business details',id:'legal',short:'Legal business name',type:'confirm',q:"Is this your legal business name?",help:"From Arizona real estate records. Fix it if it's wrong, then tap Next.",label:'Legal business name',val:'Bortlock, LLC dba The Brokery'},
-    {sec:'Business details',id:'addr',short:'Business address',type:'confirm',q:"Is this your main business address?",help:"From public listings. Fix it if it's wrong, then tap Next.",label:'Business address',val:'4546 N 40th St, Phoenix, AZ 85018'},
-    {sec:'Business details',id:'phone',short:'Business phone',type:'confirm',q:"Is this your main business phone?",help:"From public listings. Fix it if it's wrong, then tap Next.",label:'Business phone',inputType:'tel',val:'(602) 888-6375'},
-    {sec:'Business details',id:'bizemail',short:'Business email',type:'text',inputType:'email',q:"What's the main business email?",help:"Used for your CRM account and texting registration.",ph:'name@thebrokery.com'},
-    {sec:'Business details',id:'ein',short:'EIN',type:'text',q:"What's the company EIN?",help:"Federal tax ID, on your IRS letter or tax return. Carriers require it for texting.",ph:'12-3456789'}
-  ];
-  var KEY='brokery-kickoff-v10',A={},i=-1,pick=null;
-  try{A=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){A={}}
-  A.you={n:'Tucker Blalock',t:'Managing Broker'};
+  var INVITE_EMAIL='joe@smileconvert.com';  // email to invite for domain access
+  var WEBHOOK_URL='';  // optional GoHighLevel inbound webhook, fired on submit
+  var SB=window.SB||{};
+  var TOKEN=new URLSearchParams(location.search).get('t')||'';
+  var C=null,Q=[],A={},i=-1,pick=null,reviewing=false,sent=false;
+
+  function rpc(fn,args){
+    return fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB.anon,Authorization:'Bearer '+SB.anon},body:JSON.stringify(args)})
+      .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.status===204?null:r.json()});
+  }
+  function first(n){return (n||'').trim().split(/\s+/)[0]||'you'}
+  function buildQ(c){
+    var p=c.prefill||{},fn=first(c.contact_name),biz=c.business,dns=(p.dns||'').trim(),sys=p.systems?' and '+p.systems:'';
+    var found="We found this. Fix it if it's wrong, then tap Next.";
+    function confirmOrAsk(o){
+      if(o.val)return {sec:o.sec,id:o.id,short:o.short,type:'confirm',q:o.q,help:o.help||found,label:o.short,inputType:o.inputType,val:o.val};
+      return {sec:o.sec,id:o.id,short:o.short,type:'text',q:o.ask,help:o.askHelp||'',label:o.short,inputType:o.inputType,ph:o.ph};
+    }
+    var cf=/cloudflare/i.test(dns);
+    var dnsTask=dns?{q:"Add Joe as an admin in "+dns,help:"Your domain settings for "+(p.site||'your website')+" live in "+dns+". This lets us connect your recruiting page for you.",
+        steps:cf?['Log in at dash.cloudflare.com','Go to Manage account, then Members','Click Invite and paste our email','Choose the Administrator role, then send']
+                :['Log in to '+dns,'Find account access or user management','Invite our email with admin access','Send the invite']}
+      :{q:"Give Joe access to your domain settings",help:"Wherever "+(p.site||'your website')+"'s DNS is managed, such as GoDaddy, Cloudflare or Squarespace. This lets us connect your recruiting page for you.",
+        steps:['Log in where your domain is managed','Find account access or user management','Invite our email with admin access','Send the invite']};
+    return [
+      {sec:'Primary contact',id:'you',short:'Primary contact',type:'primary',q:"Is "+fn+" your primary contact?",help:"We'll coordinate setup through this person. Add someone else if needed."},
+      confirmOrAsk({sec:'Facebook and Instagram',id:'fb',short:'Facebook Page',q:"Is this your Facebook Page?",ask:"What's your Facebook Page?",val:p.fb,ph:'facebook.com/yourpage'}),
+      confirmOrAsk({sec:'Facebook and Instagram',id:'ig',short:'Instagram',q:"Is this your Instagram?",ask:"What's your Instagram?",val:p.ig,ph:'@yourhandle'}),
+      {sec:'Facebook and Instagram',id:'bm',short:'Meta Business Manager',type:'choice',q:"Do you have a Meta Business Manager?",help:"Also called a business portfolio, at business.facebook.com.",opts:['Yes','No','Not sure']},
+      {sec:'Facebook and Instagram',id:'bmadmin',short:'Business Manager admin',type:'contact',showIf:function(){return A.bm==='Yes'},q:"Who is the admin on it?",help:"The person who can add new people to it. No passwords shared.",me:true},
+      {sec:'Facebook and Instagram',id:'metapartner',short:'Meta admin access',type:'task',device:'desktop',showIf:function(){return A.bm==='Yes'},q:"Add Joe as an admin in Meta",help:"About 2 minutes on a computer. Lets us create your ad account and handle setup for you.",copyLabel:'Invite this email',copy:function(){return META_EMAIL},steps:['Go to business.facebook.com and open Settings','Click People, then Invite people','Paste our email','Choose Full access, then click Invite'],opts:['Done','Do it on our setup call']},
+      confirmOrAsk({sec:'Website',id:'site',short:'Website',q:"Is this your website?",ask:"What's your website?",val:p.site,ph:'yourwebsite.com'}),
+      {sec:'Website',id:'cfinvite',short:'Domain admin access',type:'task',device:'desktop',q:dnsTask.q,help:dnsTask.help,copyLabel:'Invite this email',copy:function(){return INVITE_EMAIL},steps:dnsTask.steps,opts:['Done','Do it on our setup call']},
+      {sec:'Software',id:'crm',short:'Brokerage CRM',type:'choice',q:"Which CRM does "+biz+" use today?",help:"The system your agents and staff use now. Not ours.",opts:['BoldTrail (kvCORE)','Follow Up Boss','Lofty','Other','None','Not sure']},
+      {sec:'Software',id:'sysadmin',short:'CRM admin',type:'contact',q:"Who can add an admin login to "+biz+"'s CRM"+sys+"?",help:"They'll create an admin login for Joseph Harrington so we can connect your systems.",me:true},
+      confirmOrAsk({sec:'Business details',id:'legal',short:'Legal business name',q:"Is this your legal business name?",help:"From state records. Fix it if it's wrong, then tap Next.",ask:"What's your legal business name?",askHelp:"As registered with the state.",val:p.legal,ph:biz}),
+      confirmOrAsk({sec:'Business details',id:'addr',short:'Business address',q:"Is this your main business address?",help:"From public listings. Fix it if it's wrong, then tap Next.",ask:"What's your main business address?",val:p.addr,ph:'Street, City, ST 00000'}),
+      confirmOrAsk({sec:'Business details',id:'phone',short:'Business phone',q:"Is this your main business phone?",help:"From public listings. Fix it if it's wrong, then tap Next.",ask:"What's your main business phone?",inputType:'tel',val:p.phone,ph:'(000) 000-0000'}),
+      {sec:'Business details',id:'bizemail',short:'Business email',type:'text',inputType:'email',q:"What's the main business email?",help:"Used for your CRM account and texting registration.",ph:'name@'+(p.site||'yourwebsite.com').replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/.*$/,'')},
+      {sec:'Business details',id:'ein',short:'EIN',type:'text',q:"What's the company EIN?",help:"Federal tax ID, on your IRS letter or tax return. Carriers require it for texting.",ph:'12-3456789'}
+    ];
+  }
   function shown(q){return !q.showIf||q.showIf()}
   function vis(){return Q.filter(shown)}
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(A))}catch(e){}}
   var $=function(id){return document.getElementById(id)};
   var main=$('main'),body=$('body'),b1=$('b1'),back=$('back'),status=$('status');
 
@@ -212,13 +232,32 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   var DEVTXT={mobile:'Easy on your phone',desktop:'Best on a computer'};
   var PILL={mobile:'Phone OK',desktop:'Computer'};
   function setDev(k){var d=$('dev');if(!k){d.innerHTML='';d.className='dev';return}d.className='dev '+k;d.innerHTML=ICON[k]+'<span>'+PILL[k]+'</span>'}
+
+  // Autosave: every screen's answers go to the server as soon as Next is tapped.
+  function rendered(){
+    var V=vis(),out=[],fu=[],done=0;
+    V.forEach(function(q){var ok=isDone(q);if(ok)done++;else fu.push(q.short);out.push({s:q.short,v:fmt(q),ok:ok,sec:q.sec})});
+    return {answers:out,follow_up:fu,progress:{done:done,total:V.length}};
+  }
+  function save(fn){
+    var r=rendered();
+    return rpc(fn||'onboarding_save',{t:TOKEN,r:A,a:r.answers,f:r.follow_up,p:r.progress,w:A.when||null})
+      .then(function(){status.textContent=''})
+      .catch(function(){status.textContent="Couldn't save that. Check your connection and tap Next again."});
+  }
+
+  function invalid(){
+    setDev(null);$('bar').style.width='0%';$('count').textContent='';
+    frame("This link isn't valid","Ask us for a new one and we'll send it right over.");
+    document.querySelector('footer').hidden=true;
+  }
   function welcome(){
     $('bar').style.width='0%';$('count').textContent='Welcome';setDev(null);
     document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
-    frame('Welcome to your onboarding',"Set aside 15 to 30 minutes and go at your own pace. Your progress saves on this device.");
+    frame('Welcome to your onboarding',"Set aside 15 to 30 minutes and go at your own pace. Your progress saves as you go.");
     var lg=el('div',{class:'legend'});
     lg.appendChild(el('div',{class:'subhead'},'Watch for these markers'));
-    ['mobile','desktop'].forEach(function(k){var r=el('div',{class:'legrow '+k});r.innerHTML='<span class="legicon">'+ICON[k]+'</span><span><strong>'+DEVTXT[k]+'</strong><br>'+(k==='mobile'?'Quick taps and confirmations.':'A few steps inside Meta or Cloudflare. Easier with a keyboard.')+'</span>';lg.appendChild(r)});
+    ['mobile','desktop'].forEach(function(k){var r=el('div',{class:'legrow '+k});r.innerHTML='<span class="legicon">'+ICON[k]+'</span><span><strong>'+DEVTXT[k]+'</strong><br>'+(k==='mobile'?'Quick taps and confirmations.':'A few steps inside Meta or your domain host. Easier with a keyboard.')+'</span>';lg.appendChild(r)});
     body.appendChild(lg);
     var cov=el('div',{class:'legend'});cov.appendChild(el('div',{class:'subhead'},"What we'll cover"));
     var ul=el('ul',{class:'cover'});['Your primary contact','Facebook, Instagram and Meta access','Website and domain access','Your brokerage software','Business details for texting'].forEach(function(t){ul.appendChild(el('li',{},t))});
@@ -241,7 +280,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
       if(meOn)any=true;b1.textContent=any?'Next':'Skip'}
     var meOn=false;
     if(q.type==='primary'){
-      var pc=el('div',{class:'pcard'});pc.appendChild(el('strong',{},'Tucker Blalock'));pc.appendChild(el('span',{},'Managing Broker, The Brokery'));body.appendChild(pc);
+      var pc=el('div',{class:'pcard'});pc.appendChild(el('strong',{},C.contact_name));pc.appendChild(el('span',{},[C.contact_title,C.business].filter(Boolean).join(', ')));body.appendChild(pc);
       var ex=A.extra||null,wrap=el('div',{class:'fields'});
       var add=el('button',{type:'button',class:'addbtn'},'+ Add another primary contact');
       function showExtra(on){wrap.hidden=!on;add.hidden=on;if(on){var f=$('x_n');f&&f.focus()}}
@@ -249,40 +288,39 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
       [['x_n','Name','text'],['x_t','Title','text'],['x_e','Email','email'],['x_p','Phone','tel']].forEach(function(f,k){
         wrap.appendChild(input(f[0],f[1],f[2],ex?[ex.n,ex.t,ex.e,ex.p][k]:'',''))});
       var rm=el('button',{type:'button',class:'rmbtn'},'Remove this contact');
-      rm.onclick=function(){wrap.querySelectorAll('input').forEach(function(x){x.value=''});A.extra=null;save();showExtra(false)};
+      rm.onclick=function(){wrap.querySelectorAll('input').forEach(function(x){x.value=''});A.extra=null;showExtra(false)};
       wrap.appendChild(rm);
       add.onclick=function(){showExtra(true)};
       body.appendChild(add);body.appendChild(wrap);showExtra(!!ex);
-      b1.onclick=function(){A.you={n:'Tucker Blalock',t:'Managing Broker'};var n=val('x_n'),t=val('x_t'),e=val('x_e'),p=val('x_p');
-        A.extra=(n||t||e||p)?{n:n,t:t,e:e,p:p}:null;save();go(1)};
+      b1.onclick=function(){var n=val('x_n'),t=val('x_t'),e=val('x_e'),p=val('x_p');
+        A.extra=(n||t||e||p)?{n:n,t:t,e:e,p:p}:null;A.you='OK';save();go(1)};
       b1.textContent="Yes, next";
       return;
     }
     if(q.type==='contact'){
-      var v=cur||{},box=el('div',{class:'fields'}),mine=q.id==='you',y=A.you||{};
+      var v=cur||{},box=el('div',{class:'fields'});
       meOn=!!v.me;
       if(q.me){
         var lab=el('label',{class:'meopt',for:'q_me'});
         var cb=el('input',{type:'checkbox',id:'q_me'});cb.checked=meOn;
         var txt=el('span',{class:'metxt'});txt.appendChild(el('strong',{},"It's me"));
-        txt.appendChild(el('span',{},(y.n?y.n+', ':'')+'use my contact info'));
+        txt.appendChild(el('span',{},C.contact_name+', use my contact info'));
         lab.appendChild(cb);lab.appendChild(txt);body.appendChild(lab);
         cb.onchange=function(){meOn=cb.checked;box.hidden=meOn;lab.classList.toggle('on',meOn);live()};
         lab.classList.toggle('on',meOn);box.hidden=meOn;
       }
-      box.appendChild(input('q_n','Name','text',v.n,'',mine?'name':'off'));
-      if(q.title)box.appendChild(input('q_ti','Title','text',v.t,'','organization-title'));
-      box.appendChild(input('q_e','Email','email',v.e,'',mine?'email':'off'));
-      box.appendChild(input('q_p','Phone','tel',v.p,'',mine?'tel':'off'));
+      box.appendChild(input('q_n','Name','text',v.n,''));
+      box.appendChild(input('q_e','Email','email',v.e,''));
+      box.appendChild(input('q_p','Phone','tel',v.p,''));
       body.appendChild(box);
       b1.onclick=function(){if(meOn){A[q.id]={me:true};save();return go(1)}
-        var n=val('q_n'),t=val('q_ti'),e=val('q_e'),p=val('q_p');A[q.id]=(n||t||e||p)?{n:n,t:t,e:e,p:p}:'SKIPPED';save();go(1)};
+        var n=val('q_n'),e=val('q_e'),p=val('q_p');A[q.id]=(n||e||p)?{n:n,e:e,p:p}:'SKIPPED';save();go(1)};
     }else if(q.type==='text'){
       var bx=el('div',{class:'fields'});bx.appendChild(input('q_t',q.label||'Your answer',q.inputType||'text',cur||'',q.ph));body.appendChild(bx);
       b1.onclick=function(){A[q.id]=val('q_t')||'SKIPPED';save();go(1)};
     }else if(q.type==='confirm'){
-      var shown=typeof cur==='string'?cur:q.val;
-      var cx=el('div',{class:'fields'});cx.appendChild(input('q_c',q.label,q.inputType||'text',shown,''));body.appendChild(cx);
+      var shownVal=typeof cur==='string'?cur:q.val;
+      var cx=el('div',{class:'fields'});cx.appendChild(input('q_c',q.label,q.inputType||'text',shownVal,''));body.appendChild(cx);
       b1.onclick=function(){A[q.id]=val('q_c')||'SKIPPED';save();go(1)};
     }else if(q.type==='task'){
       var cv=q.copy()||'[add before sending]';
@@ -292,36 +330,31 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
       cbx.appendChild(cpy);body.appendChild(cbx);
       var ol=el('ol',{class:'steps'});q.steps.forEach(function(t){ol.appendChild(el('li',{},t))});body.appendChild(ol);
       body.appendChild(el('div',{class:'subhead'},'Where are you at?'));
-      pick=typeof A[q.id]==='string'&&A[q.id]!=='SKIPPED'?A[q.id]:null;
-      var tc=el('div',{class:'choices'});
-      q.opts.forEach(function(o){var b=el('button',{type:'button',class:'choice','aria-pressed':String(pick===o)},o);
-        b.onclick=function(){pick=o;b1.disabled=false;[].forEach.call(tc.children,function(c){c.setAttribute('aria-pressed',String(c===b))})};tc.appendChild(b)});
-      body.appendChild(tc);b1.disabled=!pick;
-      b1.onclick=function(){if(!pick)return;A[q.id]=pick;save();go(1)};
+      choices(q);
       return;
     }else{
-      pick=typeof A[q.id]==='string'&&A[q.id]!=='SKIPPED'?A[q.id]:null;
-      var ch=el('div',{class:'choices'});
-      q.opts.forEach(function(o){var b=el('button',{type:'button',class:'choice','aria-pressed':String(pick===o)},o);
-        b.onclick=function(){pick=o;b1.disabled=false;[].forEach.call(ch.children,function(c){c.setAttribute('aria-pressed',String(c===b))})};ch.appendChild(b)});
-      body.appendChild(ch);b1.disabled=!pick;
-      b1.onclick=function(){if(!pick)return;A[q.id]=pick;save();go(1)};
+      choices(q);
       return;
     }
     body.querySelectorAll('input:not([type=checkbox])').forEach(function(x){x.addEventListener('input',live)});live();
   }
+  function choices(q){
+    pick=typeof A[q.id]==='string'&&A[q.id]!=='SKIPPED'?A[q.id]:null;
+    var ch=el('div',{class:'choices'});
+    q.opts.forEach(function(o){var b=el('button',{type:'button',class:'choice','aria-pressed':String(pick===o)},o);
+      b.onclick=function(){pick=o;b1.disabled=false;[].forEach.call(ch.children,function(c){c.setAttribute('aria-pressed',String(c===b))})};ch.appendChild(b)});
+    body.appendChild(ch);b1.disabled=!pick;
+    b1.onclick=function(){if(!pick)return;A[q.id]=pick;save();go(1)};
+  }
   function fmt(q){
-    if(q.type==='primary'){var r='Confirmed: Tucker Blalock, Managing Broker';var x=A.extra;if(x)r+='\n  Also add: '+[x.n,x.t,x.e,x.p].filter(Boolean).join(' | ');return r}
+    if(q.type==='primary'){var r='Confirmed: '+[C.contact_name,C.contact_title].filter(Boolean).join(', ');var x=A.extra;if(x)r+='\n  Also add: '+[x.n,x.t,x.e,x.p].filter(Boolean).join(' | ');return r}
     var v=A[q.id];
     if(v==null||v==='')return '(left blank)';
     if(v==='SKIPPED')return '(skipped)';
     if(q.type==='confirm')return v===q.val?'Confirmed: '+v:'Changed to: '+v;
-    if(typeof v==='object'){if(v.ok)return 'Confirmed: '+q.val;if(v.fixed)return 'Corrected to: '+v.fixed;if(v.me)return 'Tucker Blalock';return [v.n,v.t,v.e,v.p].filter(Boolean).join(' | ')}
+    if(typeof v==='object'){if(v.me)return C.contact_name;return [v.n,v.t,v.e,v.p].filter(Boolean).join(' | ')}
     return v;
   }
-  // Set to a GoHighLevel inbound webhook URL when this page is hosted on your own site.
-  var WEBHOOK_URL='';
-  var reviewing=false,sent=false;
   function isDone(q){
     if(q.type==='primary')return true;
     var v=A[q.id];if(v==null||v===''||v==='SKIPPED')return false;
@@ -335,7 +368,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     frame('','');document.querySelector('.head').hidden=true;
     var sp=el('div',{class:'splash'});
     sp.appendChild(el('div',{class:'bigcheck','aria-hidden':'true'},'✓'));
-    sp.appendChild(el('h2',{},"You're all set, Tucker."));
+    sp.appendChild(el('h2',{},"You're all set, "+first(C.contact_name)+"."));
     sp.appendChild(el('p',{},"We're cooking in the background now. We'll follow up with next steps, and reach out if we need anything else."));
     var rv=el('button',{type:'button',class:'btn ghost revbtn'},'Review answers');rv.onclick=function(){finish(true)};
     sp.appendChild(rv);
@@ -350,7 +383,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     var call=el('div',{class:'callcard'});call.appendChild(el('strong',{},'Book your 15-minute setup call'));
     call.appendChild(el('span',{},"We'll walk through anything left, including adding your payment card to the new ad account. Plus anything still open below."));
     var tf=input('q_when','What days and times work best?','text',A.when||'','e.g. Thursday after 2pm');tf.classList.add('whenfield');
-    tf.querySelector('input').addEventListener('input',function(e){A.when=e.target.value;save()});call.appendChild(tf);
+    tf.querySelector('input').addEventListener('input',function(e){A.when=e.target.value});call.appendChild(tf);
     if(left){body.appendChild(call)}
     else{
       call.firstChild.textContent='Want a quick call?';
@@ -372,15 +405,32 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     back.disabled=false;back.onclick=function(){reviewing=false;var V2=vis();i=Q.indexOf(V2[V2.length-1]);render()};
     b1.disabled=false;b1.textContent=sent?'Submit changes':'Confirm and submit';
     b1.onclick=function(){
-      A.when=val('q_when')||A.when||'';var payload={form:'The Brokery kickoff',setup_call_availability:A.when||'(not given)',submitted_at:new Date().toISOString(),answers:{},follow_up:[]};
-      vis().forEach(function(q){payload.answers[q.short]=fmt(q);if(!isDone(q))payload.follow_up.push(q.short)});
-      if(WEBHOOK_URL){try{fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){})}catch(e){}}
-      sent=true;A._submitted=payload.submitted_at;save();thanks();
+      A.when=val('q_when')||A.when||'';
+      b1.disabled=true;b1.textContent='Sending';
+      save('onboarding_submit').then(function(){
+        if(status.textContent){b1.disabled=false;b1.textContent=sent?'Submit changes':'Confirm and submit';return}
+        if(WEBHOOK_URL){var r=rendered(),payload={form:C.business+' kickoff',setup_call_availability:A.when||'(not given)',submitted_at:new Date().toISOString(),answers:{},follow_up:r.follow_up};
+          r.answers.forEach(function(x){payload.answers[x.s]=x.v});
+          try{fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){})}catch(e){}}
+        sent=true;thanks();
+      });
     };
   }
   function go(d){if(reviewing&&d>0){return finish(true)}var j=i+d;while(j>=0&&j<Q.length&&!shown(Q[j]))j+=d;if(j<0){i=-1;return render()}if(j>=Q.length){i=Q.length;return finish()}i=j;render()}
   document.addEventListener('keydown',function(ev){if(ev.key!=='Enter')return;var t=ev.target.tagName,choice=ev.target.classList&&ev.target.classList.contains('choice');if(!choice&&(t==='INPUT'||t==='TEXTAREA'||t==='BUTTON'||t==='A'))return;if(!b1.disabled&&!document.querySelector('footer').hidden){ev.preventDefault();b1.click()}});
-  render();
+
+  // Boot: load this customer's onboarding by the token in the link
+  document.querySelector('footer').hidden=true;
+  if(!TOKEN||!SB.url)return invalid();
+  rpc('onboarding_load',{t:TOKEN}).then(function(c){
+    if(!c)return invalid();
+    C=c;A=(c.raw&&typeof c.raw==='object')?c.raw:{};sent=!!c.submitted_at;
+    document.querySelector('.eyebrow').textContent='DeNovo Brand Identity · '+c.business;
+    document.title=c.business+' Kickoff Checklist';
+    Q=buildQ(c);
+    if(sent)return thanks();
+    render();
+  }).catch(invalid);
 })();
 </script>
 

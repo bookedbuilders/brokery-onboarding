@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Onboarding Admin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#f6f7f5;--surface:#ffffff;--ink:#1d2321;--muted:#5d6763;--line:#d9dedb;
+  --accent:#2f6b57;--accent-ink:#ffffff;--soft:#e7f0ec;--warn:#a85a17;--warnsoft:#f6e9dc;
+  --display:"Fraunces",Georgia,serif;--body:"Public Sans",system-ui,-apple-system,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141816;--surface:#1c211f;--ink:#e8ece9;--muted:#9aa5a0;--line:#2f3633;--accent:#7cc3a7;--accent-ink:#0f1412;--soft:#22302a;--warn:#e7a35f;--warnsoft:#3a2c1f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141816;--surface:#1c211f;--ink:#e8ece9;--muted:#9aa5a0;--line:#2f3633;--accent:#7cc3a7;--accent-ink:#0f1412;--soft:#22302a;--warn:#e7a35f;--warnsoft:#3a2c1f;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);padding:0 16px 64px}
+.wrap{max-width:960px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px 0 16px;border-bottom:1px solid var(--line);margin-bottom:28px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.who{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--muted)}
+h1{font:600 30px/1.2 var(--display);margin:0 0 6px;text-wrap:balance}
+h2{font:600 22px/1.25 var(--display);margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 24px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.btn{font:600 16px var(--body);border-radius:10px;padding:12px 22px;cursor:pointer;min-height:48px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.ghost{background:transparent;color:var(--accent);border-color:var(--line)}
+.ghost:hover{text-decoration:underline;text-underline-offset:4px}
+.link{background:none;border:0;color:var(--accent);font:600 15px var(--body);cursor:pointer;padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+.btn:disabled{background:var(--surface);color:var(--muted);border-color:var(--line);cursor:not-allowed}
+input,button:focus-visible,a:focus-visible{outline-color:var(--ink)}
+input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.fields{display:flex;flex-direction:column;gap:14px;max-width:520px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:600;font-size:15px}
+.hint{font-size:13px;color:var(--muted);font-weight:400}
+input{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:100%;min-height:50px}
+.subhead{font:600 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding-top:10px}
+.status{font-size:15px;color:var(--warn);min-height:24px}
+.ok{color:var(--accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:12px 14px;border-top:1px solid var(--line);vertical-align:top}
+thead th{border-top:0;font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap}
+thead th:hover{color:var(--ink)}
+thead th .dir{font-size:10px;margin-left:4px}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:var(--soft)}
+td.mono{font:500 14px var(--mono)}
+.pill{display:inline-block;font:600 12px var(--body);padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill.done{background:var(--soft);color:var(--accent)}
+.pill.open{background:var(--warnsoft);color:var(--warn)}
+.pill.none{background:var(--line);color:var(--muted)}
+.copybox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:8px 0 24px;max-width:720px}
+.copyl{display:flex;flex-direction:column;min-width:0}
+.copylab{font-size:13px;color:var(--muted)}
+.copyl strong{font:500 15px var(--mono);word-break:break-all}
+.copybtn{flex:none;background:var(--soft);color:var(--accent);border:0;border-radius:8px;font:600 15px var(--body);padding:10px 14px;cursor:pointer;min-height:44px}
+.mark{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);font:700 13px var(--body);color:var(--accent-ink);vertical-align:middle}
+.mark.ok{background:var(--accent);border-color:var(--accent)}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.meta div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.meta span{display:block;font-size:13px;color:var(--muted)}
+.meta strong{font-size:16px}
+pre.ans{white-space:pre-wrap;margin:0;font:inherit}
+.empty{color:var(--muted);padding:32px 14px;text-align:center}
+.login{max-width:420px;margin:10vh auto 0}
+@media (max-width:640px){th.opt,td.opt{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><div class="eyebrow">DeNovo Brand Identity</div><strong>Onboarding</strong></div>
+    <div class="who" id="who" hidden><span id="email"></span><button type="button" class="link" id="out">Sign out</button></div>
+  </header>
+  <div id="view"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../config.js"></script>
+<script>
+(function(){
+  var SB=window.SB||{};
+  var view=document.getElementById('view');
+  if(!SB.url){view.innerHTML='<p class="status">config.js has no Supabase URL yet.</p>';return}
+  var sb=supabase.createClient(SB.url,SB.anon);
+  var $=function(id){return document.getElementById(id)};
+  function el(tag,attrs,text){var e=document.createElement(tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e}
+  function input(id,lab,v,ph,type,hint){var f=el('div',{class:'field'});var l=el('label',{for:id},lab);if(hint){l.appendChild(el('span',{class:'hint'},' '+hint))}f.appendChild(l);
+    var x=el('input',{id:id,type:type||'text',autocomplete:'off'});x.value=v||'';if(ph)x.placeholder=ph;f.appendChild(x);return f}
+  function val(id){var x=$(id);return x?x.value.trim():''}
+  function surveyBase(){return location.origin+location.pathname.replace(/admin\/?(index\.html)?$/,'')}
+  function linkFor(t){return surveyBase()+'?t='+t}
+  function when(s){if(!s)return '-';var d=new Date(s);return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
+  function statusOf(o){if(o.submitted_at)return ['done','Submitted'];var p=o.progress||{};if(p.done>0||(p.total>0&&o.updated_at!==o.created_at))return ['open','In progress'];return ['none','Not started']}
+  function copyBtn(text){var b=el('button',{type:'button',class:'copybtn'},'Copy');
+    b.onclick=function(ev){ev.stopPropagation();try{navigator.clipboard.writeText(text).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)},function(){b.textContent='Select it'})}catch(e){}};return b}
+
+  // Auth
+  var recovering=false;
+  sb.auth.onAuthStateChange(function(ev,session){
+    if(ev==='PASSWORD_RECOVERY'){recovering=true;return setPassword()}
+    if(session){$('who').hidden=false;$('email').textContent=session.user.email;if(!recovering)route()}
+    else{$('who').hidden=true;login()}
+  });
+  $('out').onclick=function(){sb.auth.signOut()};
+
+  function login(msg){
+    view.innerHTML='';var box=el('div',{class:'login'});
+    box.appendChild(el('h1',{},'Sign in'));box.appendChild(el('p',{class:'sub'},'Joe and Landon only.'));
+    var f=el('form',{class:'fields'});f.appendChild(input('u','Email','','','email'));f.appendChild(input('p','Password','','','password'));
+    var st=el('div',{class:'status'},msg||'');var b=el('button',{type:'submit',class:'btn'},'Sign in');
+    f.appendChild(b);f.appendChild(st);
+    var fg=el('button',{type:'button',class:'link'},'Email me a link to set or reset my password');
+    fg.onclick=function(){var u=val('u');if(!u){st.textContent='Type your email first.';return}
+      sb.auth.resetPasswordForEmail(u,{redirectTo:location.origin+location.pathname}).then(function(r){st.textContent=r.error?r.error.message:'Sent. Check your email.';if(!r.error)st.className='status ok'})};
+    f.appendChild(fg);
+    f.onsubmit=function(e){e.preventDefault();b.disabled=true;st.textContent='';
+      sb.auth.signInWithPassword({email:val('u'),password:val('p')}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false}})};
+    box.appendChild(f);view.appendChild(box);$('u').focus();
+  }
+  function setPassword(){
+    view.innerHTML='';var box=el('div',{class:'login'});
+    box.appendChild(el('h1',{},'Set your password'));box.appendChild(el('p',{class:'sub'},'At least 8 characters.'));
+    var f=el('form',{class:'fields'});f.appendChild(input('np','New password','','','password'));
+    var st=el('div',{class:'status'});var b=el('button',{type:'submit',class:'btn'},'Save password');f.appendChild(b);f.appendChild(st);
+    f.onsubmit=function(e){e.preventDefault();var p=val('np');if(p.length<8){st.textContent='At least 8 characters.';return}b.disabled=true;
+      sb.auth.updateUser({password:p}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false;return}recovering=false;history.replaceState(null,'',location.pathname);route()})};
+    box.appendChild(f);view.appendChild(box);$('np').focus();
+  }
+
+  // Routing: #list (default), #new, #<id>
+  window.addEventListener('hashchange',route);
+  function route(){var h=location.hash.replace('#','');if(h==='new')return newForm();if(h&&h!=='list')return detail(h);list()}
+
+  // List
+  var rows=[],sortKey='updated_at',sortDir=-1;
+  function list(){
+    view.innerHTML='';
+    var r=el('div',{class:'row'});var t=el('div');t.appendChild(el('h1',{},'Onboardings'));r.appendChild(t);
+    var nb=el('button',{type:'button',class:'btn'},'+ New onboarding');nb.onclick=function(){location.hash='new'};r.appendChild(nb);view.appendChild(r);
+    var card=el('div',{class:'card'});view.appendChild(card);card.appendChild(el('div',{class:'empty'},'Loading'));
+    sb.from('onboardings').select('id,token,business,contact_name,contact_title,progress,submitted_at,created_at,updated_at').then(function(res){
+      if(res.error){card.innerHTML='';card.appendChild(el('div',{class:'empty'},res.error.message));return}
+      rows=res.data||[];drawTable(card);
+    });
+  }
+  var COLS=[
+    {k:'business',l:'Business',v:function(o){return o.business}},
+    {k:'contact_name',l:'Contact',v:function(o){return o.contact_name}},
+    {k:'progress',l:'Progress',v:function(o){var p=o.progress||{};return p.total?p.done+' of '+p.total:'-'},n:function(o){var p=o.progress||{};return p.total?p.done/p.total:-1}},
+    {k:'status',l:'Status',v:function(o){return statusOf(o)[1]},n:function(o){return o.submitted_at?2:statusOf(o)[0]==='open'?1:0},pill:true},
+    {k:'updated_at',l:'Updated',v:function(o){return when(o.updated_at)},n:function(o){return new Date(o.updated_at).getTime()}},
+    {k:'link',l:'Link',opt:true}
+  ];
+  function drawTable(card){
+    card.innerHTML='';
+    if(!rows.length){card.appendChild(el('div',{class:'empty'},'No onboardings yet. Create the first one.'));return}
+    var tb=el('table');var th=el('thead'),tr=el('tr');
+    COLS.forEach(function(c){var h=el('th',{class:c.opt?'opt':''},c.l);if(c.k!=='link'){h.onclick=function(){if(sortKey===c.k)sortDir=-sortDir;else{sortKey=c.k;sortDir=c.k==='updated_at'||c.k==='progress'||c.k==='status'?-1:1}drawTable(card)};
+      if(sortKey===c.k)h.appendChild(el('span',{class:'dir'},sortDir>0?'▲':'▼'))}tr.appendChild(h)});
+    th.appendChild(tr);tb.appendChild(th);
+    var col=COLS.filter(function(c){return c.k===sortKey})[0];
+    var sorted=rows.slice().sort(function(a,b){var x=col.n?col.n(a):col.v(a).toLowerCase(),y=col.n?col.n(b):col.v(b).toLowerCase();return (x<y?-1:x>y?1:0)*sortDir});
+    var body=el('tbody');
+    sorted.forEach(function(o){var r=el('tr',{class:'click'});r.onclick=function(){location.hash=o.id};
+      COLS.forEach(function(c){var d=el('td',{class:c.opt?'opt':''});
+        if(c.k==='link'){d.appendChild(copyBtn(linkFor(o.token)))}
+        else if(c.pill){var s=statusOf(o);d.appendChild(el('span',{class:'pill '+s[0]},s[1]))}
+        else d.textContent=c.v(o);
+        r.appendChild(d)});
+      body.appendChild(r)});
+    tb.appendChild(body);card.appendChild(tb);
+  }
+
+  // New
+  var PRE=[['business','Business name','The Brokery'],['contact_name','Primary contact','Tucker Blalock'],['contact_title','Contact title','Managing Broker'],
+    ['fb','Facebook Page','facebook.com/TheBrokeryAZ'],['ig','Instagram','@thebrokery'],['site','Website','thebrokery.com'],['dns','Domain host','Cloudflare'],
+    ['legal','Legal business name','Bortlock, LLC dba The Brokery'],['addr','Business address','4546 N 40th St, Phoenix, AZ 85018'],['phone','Business phone','(602) 888-6375'],['systems','Other systems to get a login for','BrokerMint']];
+  function newForm(){
+    view.innerHTML='';
+    var bk=el('button',{type:'button',class:'link'},'← All onboardings');bk.onclick=function(){location.hash='list'};view.appendChild(bk);
+    view.appendChild(el('h1',{},'New onboarding'));view.appendChild(el('p',{class:'sub'},"What you fill in here is what the customer sees prefilled. Leave a field blank and they'll be asked for it instead."));
+    var f=el('form',{class:'fields'});
+    f.appendChild(el('div',{class:'subhead'},'Customer'));
+    PRE.slice(0,3).forEach(function(p){f.appendChild(input('f_'+p[0],p[1],'',p[2],'text',p[0]==='contact_title'?'':'required'))});
+    f.appendChild(el('div',{class:'subhead'},'What we found'));
+    PRE.slice(3).forEach(function(p){f.appendChild(input('f_'+p[0],p[1],'',p[2]))});
+    var st=el('div',{class:'status'});var b=el('button',{type:'submit',class:'btn'},'Create and get the link');f.appendChild(b);f.appendChild(st);
+    f.onsubmit=function(e){e.preventDefault();
+      var biz=val('f_business'),cn=val('f_contact_name');if(!biz||!cn){st.textContent='Business name and primary contact are required.';return}
+      var prefill={};PRE.slice(3).forEach(function(p){var v=val('f_'+p[0]);if(v)prefill[p[0]]=v});
+      b.disabled=true;
+      sb.from('onboardings').insert({business:biz,contact_name:cn,contact_title:val('f_contact_title')||null,prefill:prefill}).select('id').single().then(function(r){
+        if(r.error){st.textContent=r.error.message;b.disabled=false;return}location.hash=r.data.id});
+    };
+    view.appendChild(f);$('f_business').focus();
+  }
+
+  // Detail
+  function detail(id){
+    view.innerHTML='';
+    var bk=el('button',{type:'button',class:'link'},'← All onboardings');bk.onclick=function(){location.hash='list'};view.appendChild(bk);
+    sb.from('onboardings').select('*').eq('id',id).single().then(function(r){
+      if(r.error){view.appendChild(el('p',{class:'status'},r.error.message));return}
+      var o=r.data,s=statusOf(o),link=linkFor(o.token);
+      view.appendChild(el('h1',{},o.business));
+      view.appendChild(el('p',{class:'sub'},[o.contact_name,o.contact_title].filter(Boolean).join(', ')));
+      var cb=el('div',{class:'copybox'});var cl=el('div',{class:'copyl'});cl.appendChild(el('span',{class:'copylab'},'Magic link for '+o.contact_name.split(/\s+/)[0]));cl.appendChild(el('strong',{},link));cb.appendChild(cl);cb.appendChild(copyBtn(link));view.appendChild(cb);
+      var m=el('div',{class:'meta'});
+      [['Status',s[1]],['Progress',(o.progress&&o.progress.total)?o.progress.done+' of '+o.progress.total:'-'],['Last activity',when(o.updated_at)],['Submitted',when(o.submitted_at)],['Setup call',o.setup_call||'-']].forEach(function(x){var d=el('div');d.appendChild(el('span',{},x[0]));d.appendChild(el('strong',{},x[1]));m.appendChild(d)});
+      view.appendChild(m);
+      view.appendChild(el('h2',{},'Answers'));
+      var card=el('div',{class:'card'});
+      var ans=Array.isArray(o.answers)?o.answers:[];
+      if(!ans.length){card.appendChild(el('div',{class:'empty'},"Nothing saved yet. Answers appear here as "+o.contact_name.split(/\s+/)[0]+" goes through the checklist."))}
+      else{var tb=el('table'),th=el('thead'),tr=el('tr');[['',''],['Section','opt'],['Item',''],['Answer','']].forEach(function(h){tr.appendChild(el('th',{class:h[1]},h[0]))});th.appendChild(tr);tb.appendChild(th);
+        var body=el('tbody');ans.forEach(function(a){var r=el('tr');var d0=el('td');d0.appendChild(el('span',{class:'mark'+(a.ok?' ok':''),'aria-label':a.ok?'Done':'Open'},a.ok?'✓':''));r.appendChild(d0);
+          r.appendChild(el('td',{class:'opt'},a.sec));r.appendChild(el('td',{},a.s));var d3=el('td');d3.appendChild(el('pre',{class:'ans'},a.v));r.appendChild(d3);body.appendChild(r)});
+        tb.appendChild(body);card.appendChild(tb)}
+      view.appendChild(card);
+      var fu=Array.isArray(o.follow_up)?o.follow_up:[];
+      if(fu.length){view.appendChild(el('h2',{style:'margin-top:28px'},'Needs follow-up'));var ul=el('ul');fu.forEach(function(x){ul.appendChild(el('li',{},x))});view.appendChild(ul)}
+    });
+  }
+})();
+</script>
+</body>
+</html>
