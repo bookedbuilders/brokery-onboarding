@@ -118,7 +118,7 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
       sb.auth.resetPasswordForEmail(u,{redirectTo:location.origin+location.pathname}).then(function(r){st.textContent=r.error?r.error.message:'Sent. Check your email.';if(!r.error)st.className='status ok'})};
     f.appendChild(fg);
     f.onsubmit=function(e){e.preventDefault();b.disabled=true;st.textContent='';
-      sb.auth.signInWithPassword({email:val('u'),password:val('p')}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false}})};
+      sb.auth.signInWithPassword({email:val('u'),password:val('p')||SB.openPassword||''}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false}})};
     box.appendChild(f);view.appendChild(box);$('u').focus();
   }
   function setPassword(){
