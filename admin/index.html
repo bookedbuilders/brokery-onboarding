@@ -99,18 +99,22 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
     b.onclick=function(ev){ev.stopPropagation();try{navigator.clipboard.writeText(text).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)},function(){b.textContent='Select it'})}catch(e){}};return b}
 
   // Auth
+  // Front end only for now: a known email gets in. Data calls still go through Supabase as-is.
+  var ADMINS=['joe@smileconvert.com','landon@smileconvert.com'];
+  function gateEmail(){try{return sessionStorage.getItem('admin_email')||''}catch(e){return ''}}
   var recovering=false;
   sb.auth.onAuthStateChange(function(ev,session){
     if(ev==='PASSWORD_RECOVERY'){recovering=true;return setPassword()}
-    if(session){$('who').hidden=false;$('email').textContent=session.user.email;if(!recovering)route()}
+    var em=session?session.user.email:gateEmail();
+    if(em){$('who').hidden=false;$('email').textContent=em;if(!recovering)route()}
     else{$('who').hidden=true;login()}
   });
-  $('out').onclick=function(){sb.auth.signOut()};
+  $('out').onclick=function(){try{sessionStorage.removeItem('admin_email')}catch(e){}sb.auth.signOut().then(function(){location.hash='';login()})};
 
   function login(msg){
     view.innerHTML='';var box=el('div',{class:'login'});
     box.appendChild(el('h1',{},'Sign in'));box.appendChild(el('p',{class:'sub'},'Joe and Landon only.'));
-    var f=el('form',{class:'fields'});f.appendChild(input('u','Email','','','email'));f.appendChild(input('p','Password','','','password','Leave blank to get a sign-in link by email.'));
+    var f=el('form',{class:'fields'});f.appendChild(input('u','Email','','','email'));f.appendChild(input('p','Password','','','password','Optional for now.'));
     var st=el('div',{class:'status'},msg||'');var b=el('button',{type:'submit',class:'btn'},'Sign in');
     f.appendChild(b);f.appendChild(st);
     var fg=el('button',{type:'button',class:'link'},'Email me a link to set or reset my password');
@@ -120,8 +124,8 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
     f.onsubmit=function(e){e.preventDefault();b.disabled=true;st.className='status';st.textContent='';
       var em=val('u'),pw=val('p');
       if(!em){st.textContent='Type your email.';b.disabled=false;return}
-      if(!pw){sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}}).then(function(r){
-        b.disabled=false;if(r.error){st.textContent=r.error.message;return}st.className='status ok';st.textContent='Check your email. Click the link to sign in.'});return}
+      if(!pw){if(ADMINS.indexOf(em.toLowerCase())<0){st.textContent='That email is not on the list.';b.disabled=false;return}
+        try{sessionStorage.setItem('admin_email',em.toLowerCase())}catch(e){}$('who').hidden=false;$('email').textContent=em.toLowerCase();route();return}
       sb.auth.signInWithPassword({email:em,password:pw}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false}})};
     box.appendChild(f);view.appendChild(box);$('u').focus();
   }
