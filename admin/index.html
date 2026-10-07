@@ -229,8 +229,6 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
           r.appendChild(el('td',{class:'opt'},a.sec));r.appendChild(el('td',{},a.s));var d3=el('td');d3.appendChild(el('pre',{class:'ans'},a.v));r.appendChild(d3);body.appendChild(r)});
         tb.appendChild(body);card.appendChild(tb)}
       view.appendChild(card);
-      var fu=Array.isArray(o.follow_up)?o.follow_up:[];
-      if(fu.length){view.appendChild(el('h2',{style:'margin-top:28px'},'Needs follow-up'));var ul=el('ul');fu.forEach(function(x){ul.appendChild(el('li',{},x))});view.appendChild(ul)}
     });
   }
 })();
