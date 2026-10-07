@@ -75,6 +75,10 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
 .whenfield{margin-top:8px}
 .whenfield label{font-size:14px}
 .callnote{font-weight:600;color:var(--accent)!important}
+.schedbtn{margin-top:10px}
+.callcard.done{border:1px solid var(--accent)}
+.donehead{display:flex;align-items:center;gap:10px}
+.callcard .rmbtn{margin-top:2px}
 .splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding-block:48px}
 .bigcheck{width:72px;height:72px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:700 36px var(--body)}
 .splash h2{font:600 28px/1.2 var(--display);margin:0;text-wrap:balance}
@@ -131,6 +135,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   .navrow{display:flex;align-items:center;gap:14px}
   .btn{width:auto;min-height:52px;padding-inline:28px}
   .ghost{border-color:var(--line);padding-inline:22px}
+  .schedbtn{align-self:flex-start}
   .splash{padding-block:96px}
   .revbtn{width:auto}
 }
@@ -382,17 +387,30 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     $('bar').style.width='100%';$('count').textContent='Checklist';later.hidden=true;
     var V=vis();var left=V.filter(function(q){return !isDone(q)}).length;
     frame(resumed?'Welcome back, '+first(C.contact_name):'Review your checklist',left?left+' item'+(left>1?'s':'')+(resumed?' still open. Tap one to pick up where you left off.':" still open. We'll follow up on those. Tap any item to change it."):"Everything's filled in. Tap any item to change it.");resumed=false;
-    var call=el('div',{class:'callcard'});call.appendChild(el('strong',{},'Book your 15-minute setup call'));
-    call.appendChild(el('span',{},"We'll walk through anything left, including adding your payment card to the new ad account. Plus anything still open below."));
-    var tf=input('q_when','What days and times work best?','text',A.when||'','e.g. Thursday after 2pm');tf.classList.add('whenfield');
-    tf.querySelector('input').addEventListener('input',function(e){A.when=e.target.value});call.appendChild(tf);
-    if(left){body.appendChild(call)}
+    var call=el('div',{class:'callcard'});
+    function callForm(){
+      call.className='callcard';call.innerHTML='';
+      call.appendChild(el('strong',{},left?'Book your 15-minute setup call':'Want a quick call?'));
+      call.appendChild(el('span',{},left?"We'll walk through anything left, including adding your payment card to the new ad account. Plus anything still open below.":"Optional. We'll walk through setup together."));
+      var tf=input('q_when','What days and times work best?','text',A.when||'','e.g. Thursday after 2pm');tf.classList.add('whenfield');call.appendChild(tf);
+      var sb=el('button',{type:'button',class:'btn primary schedbtn'},'Schedule');sb.disabled=!(A.when||'').trim();
+      var inp=tf.querySelector('input');inp.addEventListener('input',function(){sb.disabled=!inp.value.trim()});
+      inp.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();ev.stopPropagation();sb.click()}});
+      sb.onclick=function(){A.when=inp.value.trim();if(!A.when)return;A.scheduled=true;save();callDone()};
+      call.appendChild(sb);
+    }
+    function callDone(){
+      call.className='callcard done';call.innerHTML='';
+      var h=el('div',{class:'donehead'});h.appendChild(el('span',{class:'mark ok','aria-hidden':'true'},'✓'));h.appendChild(el('strong',{},'Scheduled'));call.appendChild(h);
+      call.appendChild(el('span',{},"We'll reach out to confirm "+A.when+"."));
+      var ch=el('button',{type:'button',class:'rmbtn'},'Change');ch.onclick=function(){A.scheduled=false;callForm();$('q_when').focus()};call.appendChild(ch);
+    }
+    if(A.scheduled&&A.when)callDone();else callForm();
+    if(left||A.when){body.appendChild(call)}
     else{
-      call.firstChild.textContent='Want a quick call?';
-      call.children[1].textContent="Optional. We'll walk through setup together.";
       var opt=el('button',{type:'button',class:'addbtn'},'Book an optional call');
       opt.onclick=function(){opt.hidden=true;call.hidden=false;var w=$('q_when');w&&w.focus()};
-      call.hidden=!A.when;opt.hidden=!!A.when;
+      call.hidden=true;
       body.appendChild(opt);body.appendChild(call);
     }
     var list=el('div',{class:'checklist'});
@@ -407,7 +425,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     back.disabled=false;back.onclick=function(){reviewing=false;var V2=vis();i=Q.indexOf(V2[V2.length-1]);render()};
     b1.disabled=false;b1.textContent=sent?'Submit changes':'Confirm and submit';
     b1.onclick=function(){
-      A.when=val('q_when')||A.when||'';
+      if($('q_when'))A.when=val('q_when')||A.when||'';
       b1.disabled=true;b1.textContent='Sending';
       save('onboarding_submit').then(function(){
         if(status.textContent){b1.disabled=false;b1.textContent=sent?'Submit changes':'Confirm and submit';return}
