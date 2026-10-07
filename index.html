@@ -170,7 +170,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   var WEBHOOK_URL='';  // optional GoHighLevel inbound webhook, fired on submit
   var SB=window.SB||{};
   var TOKEN=new URLSearchParams(location.search).get('t')||'';
-  var C=null,Q=[],A={},i=-1,pick=null,reviewing=false,sent=false;
+  var C=null,Q=[],A={},i=-2,pick=null,reviewing=false,sent=false;
 
   function rpc(fn,args){
     return fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB.anon,Authorization:'Bearer '+SB.anon},body:JSON.stringify(args)})
@@ -254,18 +254,23 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   function welcome(){
     $('bar').style.width='0%';$('count').textContent='Welcome';setDev(null);
     document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
-    frame('Welcome to your onboarding',"Set aside 15 to 30 minutes and go at your own pace. Your progress saves as you go.");
+    frame('Welcome to your onboarding',"Here's what we'll cover.");
+    var ul=el('ul',{class:'cover'});['Your primary contact','Facebook, Instagram and Meta access','Website and domain access','Your brokerage software','Business details for texting'].forEach(function(t){ul.appendChild(el('li',{},t))});
+    body.appendChild(ul);
+    back.disabled=true;b1.disabled=false;b1.textContent='Next';b1.onclick=function(){i=-1;render()};
+  }
+  function markers(){
+    $('bar').style.width='0%';$('count').textContent='Welcome';setDev(null);
+    document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
+    frame('Give yourself 15 to 20 minutes',"Go at your own pace. Your progress saves as you go. Some steps are quick on your phone, a few are easier on a computer. Watch for these markers.");
     var lg=el('div',{class:'legend'});
-    lg.appendChild(el('div',{class:'subhead'},'Watch for these markers'));
     ['mobile','desktop'].forEach(function(k){var r=el('div',{class:'legrow '+k});r.innerHTML='<span class="legicon">'+ICON[k]+'</span><span><strong>'+DEVTXT[k]+'</strong><br>'+(k==='mobile'?'Quick taps and confirmations.':'A few steps inside Meta or your domain host. Easier with a keyboard.')+'</span>';lg.appendChild(r)});
     body.appendChild(lg);
-    var cov=el('div',{class:'legend'});cov.appendChild(el('div',{class:'subhead'},"What we'll cover"));
-    var ul=el('ul',{class:'cover'});['Your primary contact','Facebook, Instagram and Meta access','Website and domain access','Your brokerage software','Business details for texting'].forEach(function(t){ul.appendChild(el('li',{},t))});
-    cov.appendChild(ul);body.appendChild(cov);
-    back.disabled=true;b1.disabled=false;b1.textContent="Let's start";b1.onclick=function(){i=-1;go(1)};
+    back.disabled=false;back.onclick=function(){i=-2;render()};b1.disabled=false;b1.textContent="Let's start";b1.onclick=function(){i=-1;go(1)};
   }
   function render(){
-    if(i<0)return welcome();
+    if(i<=-2)return welcome();
+    if(i<0)return markers();
     var q=Q[i];
     var V=vis(),pos=V.indexOf(q);
     $('bar').style.width=Math.round(pos/V.length*100)+'%';
