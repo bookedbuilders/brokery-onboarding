@@ -227,7 +227,7 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
       if(!ans.length){card.appendChild(el('div',{class:'empty'},"Nothing saved yet. Answers appear here as "+o.contact_name.split(/\s+/)[0]+" goes through the checklist."))}
       else{var tb=el('table'),th=el('thead'),tr=el('tr');[['',''],['Section','opt'],['Item',''],['Answer','']].forEach(function(h){tr.appendChild(el('th',{class:h[1]},h[0]))});th.appendChild(tr);tb.appendChild(th);
         var body=el('tbody');ans.forEach(function(a){var r=el('tr');var d0=el('td');d0.appendChild(el('span',{class:'mark'+(a.ok?' ok':''),'aria-label':a.ok?'Done':'Open'},a.ok?'✓':''));r.appendChild(d0);
-          r.appendChild(el('td',{class:'opt'},a.sec));r.appendChild(el('td',{},a.s));var d3=el('td');d3.appendChild(el('pre',{class:'ans'},a.v));r.appendChild(d3);body.appendChild(r)});
+          r.appendChild(el('td',{class:'opt'},a.sec));r.appendChild(el('td',{},a.s));var d3=el('td');d3.appendChild(el('pre',{class:'ans'},a.v.replace(/^(Confirmed|Changed to): /,'')));r.appendChild(d3);body.appendChild(r)});
         tb.appendChild(body);card.appendChild(tb)}
       view.appendChild(card);
     });
