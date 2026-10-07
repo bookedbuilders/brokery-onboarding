@@ -110,15 +110,19 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
   function login(msg){
     view.innerHTML='';var box=el('div',{class:'login'});
     box.appendChild(el('h1',{},'Sign in'));box.appendChild(el('p',{class:'sub'},'Joe and Landon only.'));
-    var f=el('form',{class:'fields'});f.appendChild(input('u','Email','','','email'));f.appendChild(input('p','Password','','','password'));
+    var f=el('form',{class:'fields'});f.appendChild(input('u','Email','','','email'));f.appendChild(input('p','Password','','','password','Leave blank to get a sign-in link by email.'));
     var st=el('div',{class:'status'},msg||'');var b=el('button',{type:'submit',class:'btn'},'Sign in');
     f.appendChild(b);f.appendChild(st);
     var fg=el('button',{type:'button',class:'link'},'Email me a link to set or reset my password');
     fg.onclick=function(){var u=val('u');if(!u){st.textContent='Type your email first.';return}
       sb.auth.resetPasswordForEmail(u,{redirectTo:location.origin+location.pathname}).then(function(r){st.textContent=r.error?r.error.message:'Sent. Check your email.';if(!r.error)st.className='status ok'})};
     f.appendChild(fg);
-    f.onsubmit=function(e){e.preventDefault();b.disabled=true;st.textContent='';
-      sb.auth.signInWithPassword({email:val('u'),password:val('p')||SB.openPassword||''}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false}})};
+    f.onsubmit=function(e){e.preventDefault();b.disabled=true;st.className='status';st.textContent='';
+      var em=val('u'),pw=val('p');
+      if(!em){st.textContent='Type your email.';b.disabled=false;return}
+      if(!pw){sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:false,emailRedirectTo:location.origin+location.pathname}}).then(function(r){
+        b.disabled=false;if(r.error){st.textContent=r.error.message;return}st.className='status ok';st.textContent='Check your email. Click the link to sign in.'});return}
+      sb.auth.signInWithPassword({email:em,password:pw}).then(function(r){if(r.error){st.textContent=r.error.message;b.disabled=false}})};
     box.appendChild(f);view.appendChild(box);$('u').focus();
   }
   function setPassword(){
@@ -133,7 +137,7 @@ pre.ans{white-space:pre-wrap;margin:0;font:inherit}
 
   // Routing: #list (default), #new, #<id>
   window.addEventListener('hashchange',route);
-  function route(){var h=location.hash.replace('#','');if(h==='new')return newForm();if(h&&h!=='list')return detail(h);list()}
+  function route(){var h=location.hash.replace('#','');if(/access_token=|refresh_token=|error=/.test(h)){history.replaceState(null,'',location.pathname);h=''}if(h==='new')return newForm();if(h&&h!=='list')return detail(h);list()}
 
   // List
   var rows=[],sortKey='updated_at',sortDir=-1;
