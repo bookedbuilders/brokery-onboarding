@@ -30,6 +30,7 @@ create policy "admins update" on public.onboardings for update to authenticated 
 create policy "admins delete" on public.onboardings for delete to authenticated using (true);
 
 revoke all on public.onboardings from anon;
+grant select, insert, update, delete on public.onboardings to authenticated, service_role;
 
 -- Customer: load by token
 create or replace function public.onboarding_load(t text)
