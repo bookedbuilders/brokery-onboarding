@@ -46,8 +46,7 @@ footer{flex:none;display:flex;flex-direction:column;gap:10px;padding-block:12px 
 .ghost:hover{text-decoration:underline;text-underline-offset:4px}
 pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0}
 .status{font-size:15px;color:var(--accent);text-align:center}
-.later{background:none;border:0;color:var(--muted);font:500 15px var(--body);min-height:44px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:center}
-.later:hover{color:var(--ink)}
+.later{grid-column:1/-1}
 .status:empty{display:none}
 .navrow{display:grid;grid-template-columns:1fr 2fr;gap:10px}
 .btn{padding:14px 12px}
@@ -128,7 +127,7 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
   .choice:hover{border-color:var(--accent)}
   footer{border-top:0;background:transparent;padding-block:28px 64px;gap:8px}
   .status{text-align:left}
-  .later{align-self:flex-start;padding-inline:0}
+  .later{margin-left:auto}
   .navrow{display:flex;align-items:center;gap:14px}
   .btn{width:auto;min-height:52px;padding-inline:28px}
   .ghost{border-color:var(--line);padding-inline:22px}
@@ -154,8 +153,8 @@ pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);backgro
     <div class="navrow">
       <button type="button" class="btn ghost" id="back">Back</button>
       <button type="button" class="btn primary" id="b1">Next</button>
+      <button type="button" class="btn ghost later" id="later" hidden>Save and finish later</button>
     </div>
-    <button type="button" class="later" id="later" hidden>Save and finish later</button>
   </footer>
 </div>
 
