@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+<title>Brokery Kickoff Checklist</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: app shell. Fixed header (progress), scrolling question area with a fixed title block, footer pinned to the bottom. Primary button always in the same spot. */
+:root{
+  --bg:#f6f7f5;--surface:#ffffff;--ink:#1d2321;--muted:#5d6763;--line:#d9dedb;
+  --accent:#2f6b57;--accent-ink:#ffffff;--soft:#e7f0ec;--warn:#a85a17;--warnsoft:#f6e9dc;
+  --display:"Fraunces",Georgia,serif;--body:"Public Sans",system-ui,-apple-system,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141816;--surface:#1c211f;--ink:#e8ece9;--muted:#9aa5a0;--line:#2f3633;--accent:#7cc3a7;--accent-ink:#0f1412;--soft:#22302a;--warn:#e7a35f;--warnsoft:#3a2c1f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141816;--surface:#1c211f;--ink:#e8ece9;--muted:#9aa5a0;--line:#2f3633;--accent:#7cc3a7;--accent-ink:#0f1412;--soft:#22302a;--warn:#e7a35f;--warnsoft:#3a2c1f;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 var(--body);padding-inline:16px;padding-block:0;overflow:hidden}
+.app{height:100%;max-width:520px;margin:0 auto;display:flex;flex-direction:column}
+header{flex:none;display:flex;flex-direction:column;gap:10px;padding-block:20px 8px}
+.eyebrow{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.count{font:500 13px var(--mono);color:var(--muted);height:20px}
+main{flex:1;overflow-y:auto;padding-block:16px;display:flex;flex-direction:column;gap:20px;min-height:0}
+.head{display:flex;flex-direction:column;gap:8px;min-height:128px}
+h1{font:600 26px/1.25 var(--display);margin:0;text-wrap:balance}
+.help{color:var(--muted);margin:0;font-size:16px;min-height:24px}
+.fields{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:600;font-size:15px}
+input{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 14px;width:100%;min-height:52px}
+input:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.found{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;font:600 19px/1.4 var(--body);word-break:break-word}
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice{text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);font:500 17px var(--body);padding:14px 16px;border-radius:10px;cursor:pointer;min-height:52px}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+footer{flex:none;display:flex;flex-direction:column;gap:10px;padding-block:12px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
+.btn{font:600 17px var(--body);border-radius:10px;padding:14px 20px;cursor:pointer;min-height:54px;width:100%;border:1px solid var(--accent)}
+.primary{background:var(--accent);color:var(--accent-ink)}
+.ghost{background:transparent;color:var(--accent)}
+pre{white-space:pre-wrap;word-break:break-word;font:13px/1.5 var(--mono);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0}
+.status{font-size:15px;color:var(--accent);text-align:center}
+.status:empty{display:none}
+.navrow{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.btn{padding:14px 12px}
+.quiet{background:transparent;color:var(--muted);border-color:var(--line)}
+.btn:disabled{opacity:.35;cursor:default}
+.checklist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.crow{display:flex;align-items:center;gap:14px;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink);min-height:56px}
+.crow:first-child{border-top:0}
+.mark{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font:700 14px var(--body);color:var(--accent-ink)}
+.crow.ok .mark{background:var(--accent);border-color:var(--accent)}
+.ctext{display:flex;flex-direction:column;min-width:0}
+.ctext strong{font-size:16px}
+.ctext span{font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow:not(.ok) .ctext span{color:var(--warn)}
+.copybox{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.copyl{display:flex;flex-direction:column;min-width:0}
+.copylab{font-size:13px;color:var(--muted)}
+.copyl strong{font:600 17px var(--mono);word-break:break-all}
+.copybtn{flex:none;background:var(--soft);color:var(--accent);border:0;border-radius:8px;font:600 15px var(--body);padding:10px 14px;cursor:pointer;min-height:44px}
+.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:16px}
+.steps li::marker{color:var(--accent);font-weight:700}
+.callcard{display:flex;flex-direction:column;gap:6px;background:var(--soft);border-radius:10px;padding:16px}
+.callcard strong{font-size:17px}
+.callcard span{font-size:15px;color:var(--muted)}
+.calllink{display:block;text-align:center;text-decoration:none;margin-top:6px;min-height:48px;line-height:20px;background:var(--surface)}
+.whenfield{margin-top:8px}
+.whenfield label{font-size:14px}
+.callnote{font-weight:600;color:var(--accent)!important}
+.splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;padding-block:48px}
+.bigcheck{width:72px;height:72px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:700 36px var(--body)}
+.splash h2{font:600 28px/1.2 var(--display);margin:0;text-wrap:balance}
+.revbtn{width:auto;margin-top:12px;padding-inline:28px}
+.splash p{margin:0;color:var(--muted);max-width:34ch}
+#body{flex:1}
+.countrow{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:24px}
+.count{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dev{flex:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);padding:3px 10px 3px 8px;border-radius:999px}
+.dev:empty{display:none}
+.dev.mobile{background:var(--soft);color:var(--accent)}
+.dev.desktop{background:var(--warnsoft);color:var(--warn)}
+.legend{display:flex;flex-direction:column;gap:10px}
+.legrow{display:flex;gap:12px;align-items:flex-start;font-size:15px;color:var(--muted);line-height:1.4}
+.legrow strong{color:var(--ink);font-size:16px}
+.legicon{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.legrow.mobile .legicon{background:var(--soft);color:var(--accent)}
+.legrow.desktop .legicon{background:var(--warnsoft);color:var(--warn)}
+.cover{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:16px}
+.pcard{display:flex;flex-direction:column;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.pcard strong{font-size:19px}
+.pcard span{color:var(--muted);font-size:15px}
+.subhead{font:600 13px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding-top:4px}
+.addbtn{background:transparent;border:1.5px dashed var(--accent);color:var(--accent);font:600 16px var(--body);border-radius:10px;padding:14px;min-height:52px;cursor:pointer;width:100%}
+.rmbtn{align-self:flex-start;background:none;border:0;color:var(--muted);font:500 15px var(--body);padding:4px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.meopt{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;min-height:64px}
+.meopt.on{border-color:var(--accent);background:var(--soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.meopt input{width:24px;height:24px;min-height:0;flex:none;accent-color:var(--accent);margin:0}
+.metxt{display:flex;flex-direction:column;font-weight:400;font-size:15px;color:var(--muted)}
+.metxt strong{font-size:17px;color:var(--ink);font-weight:600}
+#body{display:flex;flex-direction:column;gap:18px}
+.mebtn{align-self:flex-start;background:var(--soft);color:var(--accent);border:1px solid transparent;font:600 15px var(--body);padding:10px 14px;border-radius:999px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="eyebrow">DeNovo Brand Identity · The Brokery</div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="countrow"><div class="count" id="count"></div><span class="dev" id="dev"></span></div>
+  </header>
+  <main id="main">
+    <div class="head"><h1 id="q"></h1><p class="help" id="help"></p></div>
+    <div id="body"></div>
+  </main>
+  <footer>
+    <div class="status" id="status" role="status"></div>
+    <div class="navrow">
+      <button type="button" class="btn ghost" id="back">Back</button>
+      <button type="button" class="btn primary" id="b1">Next</button>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Fill these in before sending.
+  var META_EMAIL='joe@smileconvert.com';  // must match the email on Joe's Facebook login
+  var INVITE_EMAIL='joe@smileconvert.com';  // email to invite to Cloudflare
+  var Q=[
+    {sec:'Primary contact',id:'you',short:'Primary contact',type:'primary',q:"Is Tucker your primary contact?",help:"We'll coordinate setup through this person. Add someone else if needed."},
+    {sec:'Facebook and Instagram',id:'fb',short:'Facebook Page',type:'confirm',q:"Is this your Facebook Page?",help:"We found this. Fix it if it's wrong, then tap Next.",label:'Facebook Page',val:'facebook.com/TheBrokeryAZ'},
+    {sec:'Facebook and Instagram',id:'ig',short:'Instagram',type:'confirm',q:"Is this your Instagram?",help:"We found this. Fix it if it's wrong, then tap Next.",label:'Instagram',val:'@thebrokery'},
+    {sec:'Facebook and Instagram',id:'bm',short:'Meta Business Manager',type:'choice',q:"Do you have a Meta Business Manager?",help:"Also called a business portfolio, at business.facebook.com.",opts:['Yes','No','Not sure']},
+    {sec:'Facebook and Instagram',id:'bmadmin',short:'Business Manager admin',type:'contact',showIf:function(){return A.bm==='Yes'},q:"Who is the admin on it?",help:"The person who can add new people to it. No passwords shared.",me:true},
+    {sec:'Facebook and Instagram',id:'metapartner',short:'Meta admin access',type:'task',device:'desktop',showIf:function(){return A.bm==='Yes'},q:"Add Joe as an admin in Meta",help:"About 2 minutes on a computer. Lets us create your ad account and handle setup for you.",copyLabel:'Invite this email',copy:function(){return META_EMAIL},steps:['Go to business.facebook.com and open Settings','Click People, then Invite people','Paste our email','Choose Full access, then click Invite'],opts:['Done','Do it on our setup call']},
+    {sec:'Website',id:'site',short:'Website',type:'confirm',q:"Is this your website?",help:"We found this. Fix it if it's wrong, then tap Next.",label:'Website',val:'thebrokery.com'},
+    {sec:'Website',id:'cfinvite',short:'Cloudflare admin access',type:'task',device:'desktop',q:"Add Joe as an admin in Cloudflare",help:"Your domain settings for thebrokery.com live in Cloudflare. This lets us connect your recruiting page for you.",copyLabel:'Invite this email',copy:function(){return INVITE_EMAIL},steps:['Log in at dash.cloudflare.com','Go to Manage account, then Members','Click Invite and paste our email','Choose the Administrator role, then send'],opts:['Done','Do it on our setup call']},
+    {sec:'Software',id:'crm',short:'Brokerage CRM',type:'choice',q:"Which CRM does The Brokery use today?",help:"The system your agents and staff use now. Not ours.",opts:['BoldTrail (kvCORE)','Follow Up Boss','Lofty','Other','None','Not sure']},
+    {sec:'Software',id:'sysadmin',short:'Brokerage CRM and BrokerMint admin',type:'contact',q:"Who can add an admin login to The Brokery's CRM and BrokerMint?",help:"They'll create an admin login for Joseph Harrington so we can connect your systems.",me:true},
+    {sec:'Business details',id:'legal',short:'Legal business name',type:'confirm',q:"Is this your legal business name?",help:"From Arizona real estate records. Fix it if it's wrong, then tap Next.",label:'Legal business name',val:'Bortlock, LLC dba The Brokery'},
+    {sec:'Business details',id:'addr',short:'Business address',type:'confirm',q:"Is this your main business address?",help:"From public listings. Fix it if it's wrong, then tap Next.",label:'Business address',val:'4546 N 40th St, Phoenix, AZ 85018'},
+    {sec:'Business details',id:'phone',short:'Business phone',type:'confirm',q:"Is this your main business phone?",help:"From public listings. Fix it if it's wrong, then tap Next.",label:'Business phone',inputType:'tel',val:'(602) 888-6375'},
+    {sec:'Business details',id:'bizemail',short:'Business email',type:'text',inputType:'email',q:"What's the main business email?",help:"Used for your CRM account and texting registration.",ph:'name@thebrokery.com'},
+    {sec:'Business details',id:'ein',short:'EIN',type:'text',q:"What's the company EIN?",help:"Federal tax ID, on your IRS letter or tax return. Carriers require it for texting.",ph:'12-3456789'}
+  ];
+  var KEY='brokery-kickoff-v10',A={},i=-1,pick=null;
+  try{A=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){A={}}
+  A.you={n:'Tucker Blalock',t:'Managing Broker'};
+  function shown(q){return !q.showIf||q.showIf()}
+  function vis(){return Q.filter(shown)}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(A))}catch(e){}}
+  var $=function(id){return document.getElementById(id)};
+  var main=$('main'),body=$('body'),b1=$('b1'),back=$('back'),status=$('status');
+
+  function el(tag,attrs,text){var e=document.createElement(tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e}
+  function input(id,lab,type,v,ph,ac){
+    var f=el('div',{class:'field'});f.appendChild(el('label',{for:id},lab));
+    var x=el('input',{id:id,type:type||'text',autocomplete:ac||'off'});x.value=v||'';if(ph)x.placeholder=ph;
+    x.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();b1.click()}});
+    f.appendChild(x);return f;
+  }
+  function val(id){var x=$(id);return x?x.value.trim():''}
+  function frame(title,help){
+    $('q').textContent=title;$('help').textContent=help||'';body.innerHTML='';main.scrollTop=0;status.textContent='';
+  }
+  var ICON={
+    mobile:'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="11" y1="18" x2="13" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    desktop:'<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="1.8" fill="none" stroke="currentColor" stroke-width="2"/><line x1="1.5" y1="20" x2="22.5" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+  };
+  var DEVTXT={mobile:'Easy on your phone',desktop:'Best on a computer'};
+  var PILL={mobile:'Phone OK',desktop:'Computer'};
+  function setDev(k){var d=$('dev');if(!k){d.innerHTML='';d.className='dev';return}d.className='dev '+k;d.innerHTML=ICON[k]+'<span>'+PILL[k]+'</span>'}
+  function welcome(){
+    $('bar').style.width='0%';$('count').textContent='Welcome';setDev(null);
+    document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
+    frame('Welcome to your onboarding',"Set aside 15 to 30 minutes and go at your own pace. Your progress saves on this device.");
+    var lg=el('div',{class:'legend'});
+    lg.appendChild(el('div',{class:'subhead'},'Watch for these markers'));
+    ['mobile','desktop'].forEach(function(k){var r=el('div',{class:'legrow '+k});r.innerHTML='<span class="legicon">'+ICON[k]+'</span><span><strong>'+DEVTXT[k]+'</strong><br>'+(k==='mobile'?'Quick taps and confirmations.':'A few steps inside Meta or Cloudflare. Easier with a keyboard.')+'</span>';lg.appendChild(r)});
+    body.appendChild(lg);
+    var cov=el('div',{class:'legend'});cov.appendChild(el('div',{class:'subhead'},"What we'll cover"));
+    var ul=el('ul',{class:'cover'});['Your primary contact','Facebook, Instagram and Meta access','Website and domain access','Your brokerage software','Business details for texting'].forEach(function(t){ul.appendChild(el('li',{},t))});
+    cov.appendChild(ul);body.appendChild(cov);
+    back.disabled=true;b1.disabled=false;b1.textContent="Let's start";b1.onclick=function(){i=-1;go(1)};
+  }
+  function render(){
+    if(i<0)return welcome();
+    var q=Q[i];
+    var V=vis(),pos=V.indexOf(q);
+    $('bar').style.width=Math.round(pos/V.length*100)+'%';
+    $('count').textContent=(pos+1)+' of '+V.length+' · '+q.sec;
+    frame(q.q,q.help);setDev(q.device||'mobile');
+    back.disabled=false;b1.disabled=false;
+    back.onclick=function(){go(-1)};
+    b1.textContent='Next';
+    var cur=A[q.id]&&A[q.id]!=='SKIPPED'?A[q.id]:null;
+
+    function live(){var any=[].some.call(body.querySelectorAll('input:not([type=checkbox])'),function(x){return x.value.trim()});
+      if(meOn)any=true;b1.textContent=any?'Next':'Skip'}
+    var meOn=false;
+    if(q.type==='primary'){
+      var pc=el('div',{class:'pcard'});pc.appendChild(el('strong',{},'Tucker Blalock'));pc.appendChild(el('span',{},'Managing Broker, The Brokery'));body.appendChild(pc);
+      var ex=A.extra||null,wrap=el('div',{class:'fields'});
+      var add=el('button',{type:'button',class:'addbtn'},'+ Add another primary contact');
+      function showExtra(on){wrap.hidden=!on;add.hidden=on;if(on){var f=$('x_n');f&&f.focus()}}
+      wrap.appendChild(el('div',{class:'subhead'},'Additional primary contact'));
+      [['x_n','Name','text'],['x_t','Title','text'],['x_e','Email','email'],['x_p','Phone','tel']].forEach(function(f,k){
+        wrap.appendChild(input(f[0],f[1],f[2],ex?[ex.n,ex.t,ex.e,ex.p][k]:'',''))});
+      var rm=el('button',{type:'button',class:'rmbtn'},'Remove this contact');
+      rm.onclick=function(){wrap.querySelectorAll('input').forEach(function(x){x.value=''});A.extra=null;save();showExtra(false)};
+      wrap.appendChild(rm);
+      add.onclick=function(){showExtra(true)};
+      body.appendChild(add);body.appendChild(wrap);showExtra(!!ex);
+      b1.onclick=function(){A.you={n:'Tucker Blalock',t:'Managing Broker'};var n=val('x_n'),t=val('x_t'),e=val('x_e'),p=val('x_p');
+        A.extra=(n||t||e||p)?{n:n,t:t,e:e,p:p}:null;save();go(1)};
+      b1.textContent="Yes, next";
+      return;
+    }
+    if(q.type==='contact'){
+      var v=cur||{},box=el('div',{class:'fields'}),mine=q.id==='you',y=A.you||{};
+      meOn=!!v.me;
+      if(q.me){
+        var lab=el('label',{class:'meopt',for:'q_me'});
+        var cb=el('input',{type:'checkbox',id:'q_me'});cb.checked=meOn;
+        var txt=el('span',{class:'metxt'});txt.appendChild(el('strong',{},"It's me"));
+        txt.appendChild(el('span',{},(y.n?y.n+', ':'')+'use my contact info'));
+        lab.appendChild(cb);lab.appendChild(txt);body.appendChild(lab);
+        cb.onchange=function(){meOn=cb.checked;box.hidden=meOn;lab.classList.toggle('on',meOn);live()};
+        lab.classList.toggle('on',meOn);box.hidden=meOn;
+      }
+      box.appendChild(input('q_n','Name','text',v.n,'',mine?'name':'off'));
+      if(q.title)box.appendChild(input('q_ti','Title','text',v.t,'','organization-title'));
+      box.appendChild(input('q_e','Email','email',v.e,'',mine?'email':'off'));
+      box.appendChild(input('q_p','Phone','tel',v.p,'',mine?'tel':'off'));
+      body.appendChild(box);
+      b1.onclick=function(){if(meOn){A[q.id]={me:true};save();return go(1)}
+        var n=val('q_n'),t=val('q_ti'),e=val('q_e'),p=val('q_p');A[q.id]=(n||t||e||p)?{n:n,t:t,e:e,p:p}:'SKIPPED';save();go(1)};
+    }else if(q.type==='text'){
+      var bx=el('div',{class:'fields'});bx.appendChild(input('q_t',q.label||'Your answer',q.inputType||'text',cur||'',q.ph));body.appendChild(bx);
+      b1.onclick=function(){A[q.id]=val('q_t')||'SKIPPED';save();go(1)};
+    }else if(q.type==='confirm'){
+      var shown=typeof cur==='string'?cur:q.val;
+      var cx=el('div',{class:'fields'});cx.appendChild(input('q_c',q.label,q.inputType||'text',shown,''));body.appendChild(cx);
+      b1.onclick=function(){A[q.id]=val('q_c')||'SKIPPED';save();go(1)};
+    }else if(q.type==='task'){
+      var cv=q.copy()||'[add before sending]';
+      var cbx=el('div',{class:'copybox'});var cl=el('div',{class:'copyl'});cl.appendChild(el('span',{class:'copylab'},q.copyLabel));cl.appendChild(el('strong',{},cv));cbx.appendChild(cl);
+      var cpy=el('button',{type:'button',class:'copybtn'},'Copy');
+      cpy.onclick=function(){try{navigator.clipboard.writeText(cv).then(function(){cpy.textContent='Copied'},function(){cpy.textContent='Select it'})}catch(e){}};
+      cbx.appendChild(cpy);body.appendChild(cbx);
+      var ol=el('ol',{class:'steps'});q.steps.forEach(function(t){ol.appendChild(el('li',{},t))});body.appendChild(ol);
+      body.appendChild(el('div',{class:'subhead'},'Where are you at?'));
+      pick=typeof A[q.id]==='string'&&A[q.id]!=='SKIPPED'?A[q.id]:null;
+      var tc=el('div',{class:'choices'});
+      q.opts.forEach(function(o){var b=el('button',{type:'button',class:'choice','aria-pressed':String(pick===o)},o);
+        b.onclick=function(){pick=o;b1.disabled=false;[].forEach.call(tc.children,function(c){c.setAttribute('aria-pressed',String(c===b))})};tc.appendChild(b)});
+      body.appendChild(tc);b1.disabled=!pick;
+      b1.onclick=function(){if(!pick)return;A[q.id]=pick;save();go(1)};
+      return;
+    }else{
+      pick=typeof A[q.id]==='string'&&A[q.id]!=='SKIPPED'?A[q.id]:null;
+      var ch=el('div',{class:'choices'});
+      q.opts.forEach(function(o){var b=el('button',{type:'button',class:'choice','aria-pressed':String(pick===o)},o);
+        b.onclick=function(){pick=o;b1.disabled=false;[].forEach.call(ch.children,function(c){c.setAttribute('aria-pressed',String(c===b))})};ch.appendChild(b)});
+      body.appendChild(ch);b1.disabled=!pick;
+      b1.onclick=function(){if(!pick)return;A[q.id]=pick;save();go(1)};
+      return;
+    }
+    body.querySelectorAll('input:not([type=checkbox])').forEach(function(x){x.addEventListener('input',live)});live();
+  }
+  function fmt(q){
+    if(q.type==='primary'){var r='Confirmed: Tucker Blalock, Managing Broker';var x=A.extra;if(x)r+='\n  Also add: '+[x.n,x.t,x.e,x.p].filter(Boolean).join(' | ');return r}
+    var v=A[q.id];
+    if(v==null||v==='')return '(left blank)';
+    if(v==='SKIPPED')return '(skipped)';
+    if(q.type==='confirm')return v===q.val?'Confirmed: '+v:'Changed to: '+v;
+    if(typeof v==='object'){if(v.ok)return 'Confirmed: '+q.val;if(v.fixed)return 'Corrected to: '+v.fixed;if(v.me)return 'Tucker Blalock';return [v.n,v.t,v.e,v.p].filter(Boolean).join(' | ')}
+    return v;
+  }
+  // Set to a GoHighLevel inbound webhook URL when this page is hosted on your own site.
+  var WEBHOOK_URL='';
+  var reviewing=false,sent=false;
+  function isDone(q){
+    if(q.type==='primary')return true;
+    var v=A[q.id];if(v==null||v===''||v==='SKIPPED')return false;
+    if(q.type==='task')return v==='Done';
+    if(v==='Not sure')return false;if(q.id==='bm'&&v==='No')return false;
+    return true;
+  }
+  function thanks(){
+    setDev(null);
+    reviewing=true;$('bar').style.width='100%';$('count').textContent='Submitted';
+    frame('','');document.querySelector('.head').hidden=true;
+    var sp=el('div',{class:'splash'});
+    sp.appendChild(el('div',{class:'bigcheck','aria-hidden':'true'},'✓'));
+    sp.appendChild(el('h2',{},"You're all set, Tucker."));
+    sp.appendChild(el('p',{},"We're cooking in the background now. We'll follow up with next steps, and reach out if we need anything else."));
+    var rv=el('button',{type:'button',class:'btn ghost revbtn'},'Review answers');rv.onclick=function(){finish(true)};
+    sp.appendChild(rv);
+    body.appendChild(sp);document.querySelector('footer').hidden=true;
+  }
+  function finish(force){
+    if(sent&&!force)return thanks();
+    setDev(null);reviewing=true;document.querySelector('.head').hidden=false;document.querySelector('footer').hidden=false;
+    $('bar').style.width='100%';$('count').textContent='Review';
+    var V=vis();var left=V.filter(function(q){return !isDone(q)}).length;
+    frame('Review your checklist',left?left+' item'+(left>1?'s':'')+" still open. We'll follow up on those. Tap any item to change it.":"Everything's filled in. Tap any item to change it.");
+    var call=el('div',{class:'callcard'});call.appendChild(el('strong',{},'Book your 15-minute setup call'));
+    call.appendChild(el('span',{},"We'll walk through anything left, including adding your payment card to the new ad account. Plus anything still open below."));
+    var tf=input('q_when','What days and times work best?','text',A.when||'','e.g. Thursday after 2pm');tf.classList.add('whenfield');
+    tf.querySelector('input').addEventListener('input',function(e){A.when=e.target.value;save()});call.appendChild(tf);
+    if(left){body.appendChild(call)}
+    else{
+      call.firstChild.textContent='Want a quick call?';
+      call.children[1].textContent="Optional. We'll walk through setup together.";
+      var opt=el('button',{type:'button',class:'addbtn'},'Book an optional call');
+      opt.onclick=function(){opt.hidden=true;call.hidden=false;var w=$('q_when');w&&w.focus()};
+      call.hidden=!A.when;opt.hidden=!!A.when;
+      body.appendChild(opt);body.appendChild(call);
+    }
+    var list=el('div',{class:'checklist'});
+    Q.forEach(function(q,k){if(!shown(q))return;
+      var ok=isDone(q),row=el('button',{type:'button',class:'crow'+(ok?' ok':'')});
+      row.appendChild(el('span',{class:'mark','aria-hidden':'true'},ok?'✓':''));
+      var t=el('span',{class:'ctext'});t.appendChild(el('strong',{},q.short));
+      t.appendChild(el('span',{},ok?fmt(q).replace(/^Confirmed: /,'').split('\n')[0]:(A[q.id]==='Do it on our setup call'?'On setup call':'Needs follow-up')));
+      row.appendChild(t);row.onclick=function(){i=k;render()};list.appendChild(row);
+    });
+    body.appendChild(list);
+    back.disabled=false;back.onclick=function(){reviewing=false;var V2=vis();i=Q.indexOf(V2[V2.length-1]);render()};
+    b1.disabled=false;b1.textContent=sent?'Submit changes':'Confirm and submit';
+    b1.onclick=function(){
+      A.when=val('q_when')||A.when||'';var payload={form:'The Brokery kickoff',setup_call_availability:A.when||'(not given)',submitted_at:new Date().toISOString(),answers:{},follow_up:[]};
+      vis().forEach(function(q){payload.answers[q.short]=fmt(q);if(!isDone(q))payload.follow_up.push(q.short)});
+      if(WEBHOOK_URL){try{fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){})}catch(e){}}
+      sent=true;A._submitted=payload.submitted_at;save();thanks();
+    };
+  }
+  function go(d){if(reviewing&&d>0){return finish(true)}var j=i+d;while(j>=0&&j<Q.length&&!shown(Q[j]))j+=d;if(j<0){i=-1;return render()}if(j>=Q.length){i=Q.length;return finish()}i=j;render()}
+  render();
+})();
+</script>
+
+</body>
+</html>
